@@ -10,10 +10,7 @@ import {
   Folder,
   Users,
   PlusCircle,
-  Plus,
-  Projector,
   ChevronDown,
-  FolderArchive,
 } from "lucide-react";
 import {
   Sidebar,
