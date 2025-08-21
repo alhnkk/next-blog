@@ -163,7 +163,7 @@ const AppSidebar = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/">
+                  <Link href="/admin/users">
                     <Users />
                     <span className="group-data-[collapsible=icon]:hidden">
                       Üyeler
