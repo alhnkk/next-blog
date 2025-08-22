@@ -47,17 +47,17 @@ const AppSidebar = () => {
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-4">
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem className="">
             <SidebarMenuButton asChild>
               <Link href="/">
                 <Image
                   src="/logo.jpeg"
                   alt="logo"
-                  width={20}
-                  height={20}
+                  width={24}
+                  height={24}
                   className="aspect-square rounded-full"
                 />
-                <span className="group-data-[collapsible=icon]:hidden">
+                <span className="group-data-[collapsible=icon]:hidden text-lg font-semibold">
                   Jurnalize
                 </span>
               </Link>
@@ -70,20 +70,7 @@ const AppSidebar = () => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  size="lg"
-                  className="border border-border justify-center my-2"
-                  asChild
-                >
-                  <Link href="/admin">
-                    <Home />
-                    <span className="group-data-[collapsible=icon]:hidden">
-                      Ana Sayfa
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+            
               <SidebarMenuItem>
                 <SidebarMenuButton
                   size="lg"
@@ -121,10 +108,10 @@ const AppSidebar = () => {
                     <SidebarMenu className="mt-2 space-y-1">
                       <SidebarMenuItem>
                         <SidebarMenuSub>
-                          <Link href="/posts">
+                          <Link href="admin/posts">
                             <span>Tüm Gönderiler</span>
                           </Link>
-                          <Link href="/posts/new">
+                          <Link href="admin/posts/new">
                             <span>Yeni Gönderi</span>
                           </Link>
                         </SidebarMenuSub>
