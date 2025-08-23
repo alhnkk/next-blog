@@ -1,11 +1,7 @@
 import {
-  Home,
   Book,
-  User,
   Search,
   Settings,
-  ChevronUp,
-  LogOut,
   Inbox,
   Folder,
   Users,
@@ -29,18 +25,12 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Collapsible } from "@/components/ui/collapsible";
 import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
+import UserNav from "@/components/user-nav";
 
 const AppSidebar = () => {
   return (
@@ -185,30 +175,8 @@ const AppSidebar = () => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="border border-border justify-center my-2">
-                  <User />{" "}
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    Alihan Küçükkaya
-                  </span>{" "}
-                  <ChevronUp className="ml-auto group-data-[collapsible=icon]:hidden" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <User /> Hesap
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings /> Ayarlar
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  <LogOut /> Çıkış Yap
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <SidebarMenuItem  className="mx-auto my-3">
+            <UserNav />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

@@ -1,5 +1,5 @@
 import AppSidebar from "@/components/admin/app-sidebar";
-import Navbar from "@/components/admin/navbar";
+import AdminNavbar from "@/components/admin/admin-navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { cookies } from "next/headers";
 
@@ -16,7 +16,7 @@ const AdminLayout = async ({
         <SidebarProvider defaultOpen={defaultOpen}>
           <AppSidebar />
           <main className="w-full">
-            <Navbar />
+            <AdminNavbar />
             <div className="px-4">{children}</div>
           </main>
         </SidebarProvider>
