@@ -1,6 +1,5 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
@@ -16,9 +15,81 @@ datasource db {
 }
 
 model Post {
-  id      Int     @id @default(autoincrement())
-  title   String
-  content String?
+  id         Int       @id @default(autoincrement())
+  title      String
+  content    String?
+  slug       String    @unique
+  excerpt    String?
+  featured   Boolean   @default(false)
+  status     PostStatus @default(DRAFT)
+  tags       String[]
+  authorId   String
+  categoryId Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  
+  // Relations
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  comments   Comment[]
+  likes      Like[]
+  
+  @@map("post")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  color       String?
+  icon        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  posts       Post[]
+  
+  @@map("category")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  authorId  String
+  postId    Int
+  parentId  Int?
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  
+  @@map("comment")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  postId    Int
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postId])
+  @@map("like")
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
 model User {
@@ -31,12 +102,14 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
-
-  role       String?
-  banned     Boolean?
-  banReason  String?
-  banExpires DateTime?
-
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  role          String?
+  banned        Boolean?
+  banReason     String?
+  banExpires    DateTime?
+  
   @@unique([email])
   @@map("user")
 }
@@ -51,9 +124,8 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   impersonatedBy String?
-
+  
   @@unique([token])
   @@map("session")
 }
@@ -73,7 +145,7 @@ model Account {
   password              String?
   createdAt             DateTime
   updatedAt             DateTime
-
+  
   @@map("account")
 }
 
@@ -84,6 +156,6 @@ model Verification {
   expiresAt  DateTime
   createdAt  DateTime?
   updatedAt  DateTime?
-
+  
   @@map("verification")
 }

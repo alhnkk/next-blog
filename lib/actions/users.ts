@@ -3,6 +3,41 @@
 import { prismadb } from "../prismadb";
 import { revalidatePath } from "next/cache";
 
+// GET ALL USERS
+export async function getUsers() {
+  try {
+    const users = await prismadb.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
+        role: true,
+        banned: true,
+        banReason: true,
+        banExpires: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return {
+      success: true,
+      data: users,
+    };
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return {
+      success: false,
+      error: "Failed to fetch users",
+    };
+  }
+}
+
 // DELETE USER
 export async function deleteUser(userId: string) {
   try {
@@ -42,38 +77,3 @@ export async function deleteUser(userId: string) {
   }
 }
 
-
-// GET ALL USERS
-export async function getUsers() {
-  try {
-    const users = await prismadb.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        emailVerified: true,
-        image: true,
-        createdAt: true,
-        updatedAt: true,
-        role: true,
-        banned: true,
-        banReason: true,
-        banExpires: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return {
-      success: true,
-      data: users,
-    };
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    return {
-      success: false,
-      error: "Failed to fetch users",
-    };
-  }
-}
