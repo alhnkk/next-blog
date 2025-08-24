@@ -1,10 +1,12 @@
-import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { betterAuth } from "better-auth";
+import { admin } from "better-auth/plugins"
+
 import { prismadb } from "@/lib/prismadb";
 
 export const auth = betterAuth({
     database: prismaAdapter(prismadb, {
-        provider: "sqlite",
+        provider: "postgresql",
       }),
     emailAndPassword: {
         enabled: true,
@@ -22,6 +24,9 @@ export const auth = betterAuth({
             clientSecret: process.env.APPLE_CLIENT_SECRET!
         }
     },
+    plugins: [
+        admin() // Admin plugin'ini ekle
+    ]
     /** if no database is provided, the user data will be stored in memory.
      * Make sure to provide a database to persist user data **/
 });
