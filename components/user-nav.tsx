@@ -1,6 +1,7 @@
 "use client"
 
-import { LogOut, Settings, User2 } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Settings, User2, UserLock } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -10,16 +11,15 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import { 
     Avatar,
     AvatarFallback, 
     AvatarImage 
 } from "@/components/ui/avatar"
 
-import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { useSession, signOut } from "@/lib/auth-client";
 
 const UserNav = () => {
     const router = useRouter();
@@ -52,15 +52,26 @@ const UserNav = () => {
                                 <span className="text-sm text-muted-foreground">{session.user.email}</span>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                                <User2 className="h-[1.2rem] w-[1.2rem] mr-2" />
-                                Profil
+                            <DropdownMenuItem asChild>
+                                <Link href="/user">
+                                    <User2 className="h-[1.2rem] w-[1.2rem] mr-2" />
+                                    Profil
+                                </Link>
+
                             </DropdownMenuItem>
 
                             <DropdownMenuItem>
                                 <Settings className="h-[1.2rem] w-[1.2rem] mr-2" />
                                 Ayarlar
                             </DropdownMenuItem>
+                                {session.user.role === "admin" && (
+                                <DropdownMenuItem asChild>
+                                    <Link href="/admin">
+                                    <UserLock className="h-[1.2rem] w-[1.2rem] mr-2" />
+                                        Admin Paneli
+                                    </Link>
+                                </DropdownMenuItem>
+                                )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                                 variant="destructive"

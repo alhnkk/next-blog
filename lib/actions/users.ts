@@ -13,6 +13,9 @@ export async function getUsers() {
         email: true,
         emailVerified: true,
         image: true,
+        bio: true,
+        location: true,
+        phone: true,
         createdAt: true,
         updatedAt: true,
         role: true,
@@ -34,6 +37,121 @@ export async function getUsers() {
     return {
       success: false,
       error: "Failed to fetch users",
+    };
+  }
+}
+
+// GET SINGLE USER BY ID
+export async function getUserById(userId: string) {
+  try {
+    const user = await prismadb.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        bio: true,
+        location: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+        role: true,
+        banned: true,
+        banReason: true,
+        banExpires: true,
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "Kullanıcı bulunamadı",
+      };
+    }
+
+    return {
+      success: true,
+      data: user,
+    };
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return {
+      success: false,
+      error: "Kullanıcı getirilirken hata oluştu",
+    };
+  }
+}
+
+// UPDATE USER
+export async function updateUser(userId: string, data: {
+  name?: string;
+  email?: string;
+  bio?: string;
+  location?: string;
+  phone?: string;
+}) {
+  try {
+    const user = await prismadb.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "Kullanıcı bulunamadı",
+      };
+    }
+
+    // Kullanıcıyı güncelle
+    const updatedUser = await prismadb.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        name: data.name,
+        email: data.email,
+        bio: data.bio,
+        location: data.location,
+        phone: data.phone,
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        bio: true,
+        location: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+        role: true,
+        banned: true,
+        banReason: true,
+        banExpires: true,
+      },
+    });
+
+    // Cache'i yenile
+    revalidatePath("/user");
+
+    return {
+      success: true,
+      data: updatedUser,
+      message: "Profil başarıyla güncellendi",
+    };
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return {
+      success: false,
+      error: "Profil güncellenirken hata oluştu",
     };
   }
 }
@@ -76,4 +194,3 @@ export async function deleteUser(userId: string) {
     };
   }
 }
-
