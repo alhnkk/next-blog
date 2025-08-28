@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -5,35 +7,33 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar, Clock, Heart, MessageCircle, Share2, Film, PenTool } from "lucide-react"
-import Image from "next/image"
 
 export default function BlogPost() {
   return (
     <div className="min-h-screen">
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 max-w-3xl">
         <article className="space-y-8">
           {/* Post Header */}
           <header className="space-y-6">
-            <div className="flex flex-wrap gap-2">
+            <div>
               <Badge variant="secondary" className="gap-1">
                 <Film className="h-3 w-3" />
                 Sinema
               </Badge>
-              <Badge variant="outline">Analiz</Badge>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold text-balance leading-tight">
-              Tarkovsky&aposnin Zaman Felsefesi: Sinematik Şiirin Derinliklerinde
+            <h1 className="text-4xl md:text-4xl font-bold text-balance leading-tight">
+              Tarkovskynin Zaman Felsefesi: Sinematik Şiirin Derinliklerinde
             </h1>
 
             <div className="flex items-center gap-4 text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/author-writing.png" alt="Yazar" />
+                  <AvatarImage src="/placeholder.jpeg" alt="Yazar" />
                   <AvatarFallback>AY</AvatarFallback>
                 </Avatar>
-                <span className="text-sm">Ahmet Yılmaz</span>
+                <span className="text-sm tracking-tight">Ahmet Yılmaz</span>
               </div>
               <Separator orientation="vertical" className="h-4" />
               <div className="flex items-center gap-1">
@@ -48,33 +48,33 @@ export default function BlogPost() {
           </header>
 
           {/* Featured Image */}
-          <div className="relative overflow-hidden rounded-lg">
+          <div className="relative overflow-hidden rounded-[1px]">
             <Image
               src="/placeholder.jpeg"
               alt="Tarkovsky film sahnesi"
-              className="w-full h-[400px] object-cover"
-              width={900}
-              height={600}
+              className="h-[400px] w-full object-cover"
+              width={600}
+              height={400}
             />
           </div>
 
           {/* Post Content */}
           <div className="prose prose-lg max-w-none">
-            <p className="text-xl text-muted-foreground leading-relaxed">
+            <p className="text-xl text-muted-foreground leading-relaxed font-serif mb-2">
               Andrei Tarkovsky, sinema tarihinin en etkileyici yönetmenlerinden biri olarak, zamanın sinematik temsilini
               yeniden tanımladı. Onun filmleri, sadece hikaye anlatmakla kalmaz, aynı zamanda zamanın kendisini
               hissettiren birer deneyim sunar.
             </p>
 
-            <p className="leading-relaxed">
+            <p className="leading-relaxed font-serif">
               Tarkovsky&aposnin sinema anlayışında zaman, montajdan çok daha önemli bir unsurdur. O, zamanı sinematik şiir
               olarak tanımlar ve her karenin içinde yaşayan, nefes alan bir zaman kavramı yaratır. Bu yaklaşım,
               Hollywood&aposun hızlı kurgu tekniklerinin tam tersidir.
             </p>
 
-            <Card className="my-8 border-l-4 border-l-primary">
-              <CardContent className="p-6">
-                <blockquote className="text-lg italic text-card-foreground">
+            <Card className="my-8 shadow-none border-l-2 border-l-primary rounded-sm">
+              <CardContent>
+                <blockquote className="text-lg italic text-card-foreground font-serif">
                   Sinema, zamanı kaydetme sanatıdır. Zaman, sinematik imgenin temel malzemesidir
                 </blockquote>
                 <cite className="text-sm text-muted-foreground mt-2 block">— Andrei Tarkovsky</cite>
@@ -83,20 +83,20 @@ export default function BlogPost() {
 
             <h2 className="text-2xl font-bold mt-8 mb-4">Zamanın Ritmi</h2>
 
-            <p className="leading-relaxed">
-              Tarkovsky&aposnin filmlerinde zaman, doğal akışında ilerler. Uzun çekimler, sessizlikler ve doğanın sesleri,
+            <p className="leading-relaxed font-serif">
+              Tarkovsy&aposnin filmlerinde zaman, doğal akışında ilerler. Uzun çekimler, sessizlikler ve doğanın sesleri,
               izleyiciyi contemplatif bir duruma sokar. Bu teknik, özellikle Stalker ve Andrei Rublev filmlerinde
               mükemmel bir şekilde uygulanır.
             </p>
 
-            <p className="leading-relaxed">
+            <p className="leading-relaxed font-serif">
               Yönetmenin bu yaklaşımı, sinema dilinin sınırlarını zorlar ve izleyiciden aktif bir katılım bekler. Her
               sahne, derin bir meditasyon gibi yaşanır ve zamanın geçişi fiziksel olarak hissedilir.
             </p>
 
             <h2 className="text-2xl font-bold mt-8 mb-4">Modern Sinemaya Etkisi</h2>
 
-            <p className="leading-relaxed">
+            <p className="leading-relaxed font-serif">
               Günümüz yönetmenleri arasında Béla Tarr, Tsai Ming-liang ve Apichatpong Weerasethakul gibi isimler,
               Tarkovsky&aposnin zaman felsefesinden derinden etkilenmiştir. Bu etki, yavaş sinema akımının doğmasına da
               katkıda bulunmuştur.
@@ -121,7 +121,7 @@ export default function BlogPost() {
           </div>
 
           {/* Engagement Section */}
-          <Card className="mt-8">
+          <Card className="mt-8 rounded-sm shadow-none border-none">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -142,7 +142,7 @@ export default function BlogPost() {
           </Card>
 
           {/* Author Bio */}
-          <Card className="mt-8">
+          <Card className="mt-8 rounded-sm shadow-none border-none">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <Avatar className="h-16 w-16">
@@ -165,18 +165,18 @@ export default function BlogPost() {
           </Card>
 
           {/* Comments Section */}
-          <section className="mt-12 space-y-6">
+          <section className="mt-12 space-y-6 rounded-sm">
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-muted-foreground" />
               <h2 className="text-2xl font-bold">Yorumlar (8)</h2>
             </div>
 
             {/* Comment Form */}
-            <Card>
+            <Card className="rounded-sm shadow-none border-none">
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <h3 className="font-semibold">Yorum Yaz</h3>
-                  <Textarea placeholder="Düşüncelerinizi paylaşın..." className="min-h-[100px] resize-none" />
+                  <Textarea placeholder="Düşüncelerinizi paylaşın..." className="min-h-[100px] resize-none  rounded-sm" />
                   <div className="flex justify-end">
                     <Button>Yorum Gönder</Button>
                   </div>
@@ -187,7 +187,7 @@ export default function BlogPost() {
             {/* Comments List */}
             <div className="space-y-4">
               {/* Comment 1 */}
-              <Card>
+              <Card className="rounded-sm bg-transparent border-none shadow-none">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <Avatar className="h-10 w-10">
@@ -215,8 +215,10 @@ export default function BlogPost() {
                 </CardContent>
               </Card>
 
+              <Separator />
+          
               {/* Comment 2 */}
-              <Card>
+              <Card className="rounded-sm bg-transparent border-none shadow-none">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <Avatar className="h-10 w-10">
@@ -243,9 +245,9 @@ export default function BlogPost() {
                   </div>
                 </CardContent>
               </Card>
-
+              <Separator />
               {/* Comment 3 */}
-              <Card>
+              <Card className="rounded-sm bg-transparent border-none shadow-none">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <Avatar className="h-10 w-10">
@@ -272,6 +274,7 @@ export default function BlogPost() {
                   </div>
                 </CardContent>
               </Card>
+              <Separator />
             </div>
 
             {/* Load More Comments */}
@@ -281,13 +284,6 @@ export default function BlogPost() {
           </section>
         </article>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t mt-16 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground text-sm">© 2024 Edebiyat & Sinema. Tüm hakları saklıdır.</p>
-        </div>
-      </footer>
     </div>
   )
 }

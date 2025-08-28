@@ -10,6 +10,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { AdPlaceholder } from "@/components/ad-placeholder";
 
 const categories = [
     {
@@ -80,6 +81,8 @@ const Sidebar = () => {
         </div>
       ))}
     </div>
+    <AdPlaceholder />
+    
   </div>
   )
 }

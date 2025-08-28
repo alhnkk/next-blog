@@ -1,7 +1,7 @@
 import BlogList from "@/components/blog-list";
 import Sidebar from "@/components/sidebar";
 
-const Blog03Page = () => {
+const BlogPage = () => {
   return (
     <div className="max-w-7xl mx-auto py-10 lg:py-16 px-6 xl:px-0 flex flex-col lg:flex-row items-start justify-between gap-x-4">
       <div className="w-5/6">
@@ -15,4 +15,4 @@ const Blog03Page = () => {
   );
 };
 
-export default Blog03Page;
+export default BlogPage;

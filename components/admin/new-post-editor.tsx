@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImageUpload } from "@/components/ui/image-upload"
 import {
-  Eye,
   Save,
   Send,
   Calendar,
@@ -20,7 +19,6 @@ import {
   Italic,
   List,
   AlignLeft,
-  MoreHorizontal,
   Plus,
   X,
   Menu,
