@@ -15,18 +15,19 @@ datasource db {
 }
 
 model Post {
-  id         Int       @id @default(autoincrement())
-  title      String
-  content    String?
-  slug       String    @unique
-  excerpt    String?
-  featured   Boolean   @default(false)
-  status     PostStatus @default(DRAFT)
-  tags       String[]
-  authorId   String
-  categoryId Int?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id           Int       @id @default(autoincrement())
+  title        String
+  content      String?
+  slug         String    @unique
+  excerpt      String?
+  featured     Boolean   @default(false)
+  featuredImage String?
+  status       PostStatus @default(DRAFT)
+  tags         String[]
+  authorId     String
+  categoryId   Int?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   
   // Relations
   author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -98,6 +99,9 @@ model User {
   email         String
   emailVerified Boolean
   image         String?
+  bio           String?
+  location      String?
+  phone         String?
   createdAt     DateTime
   updatedAt     DateTime
   sessions      Session[]

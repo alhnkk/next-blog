@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, Settings, User2 } from "lucide-react";
+import { LogOut, Settings, Shield, User2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -52,15 +52,21 @@ const UserNav = () => {
                                 <span className="text-sm text-muted-foreground">{session.user.email}</span>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                                <User2 className="h-[1.2rem] w-[1.2rem] mr-2" />
-                                Profil
-                            </DropdownMenuItem>
+                           <Link href="/profile">
+                                <DropdownMenuItem>
+                                    <User2 className="h-[1.2rem] w-[1.2rem] mr-2" />
+                                    Profil
+                                </DropdownMenuItem>
+                           </Link>
 
-                            <DropdownMenuItem>
-                                <Settings className="h-[1.2rem] w-[1.2rem] mr-2" />
-                                Ayarlar
-                            </DropdownMenuItem>
+                            {session.user.role === "admin" && (
+                             <Link href="/admin">
+                                   <DropdownMenuItem>
+                                    <Shield className="h-[1.2rem] w-[1.2rem] mr-2" />
+                                    Admin Paneli
+                                </DropdownMenuItem>
+                             </Link>
+                            ) }
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                                 variant="destructive"

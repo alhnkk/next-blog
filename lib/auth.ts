@@ -7,7 +7,7 @@ import { prismadb } from "@/lib/prismadb";
 export const auth = betterAuth({
     database: prismaAdapter(prismadb, {
         provider: "postgresql",
-      }),
+    }),
     emailAndPassword: {
         enabled: true,
         async sendResetPassword(data, request) {

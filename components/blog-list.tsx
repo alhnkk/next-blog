@@ -1,42 +1,122 @@
-import {
-    Calendar,
-  } from "lucide-react";
-  
+import { Calendar, Heart, MessageCircle } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import Link from "next/link";
 
-const BlogList = () => {
-  return (
-    <div className="mt-4 space-y-12">
-    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-      <Card
-        key={i}
-        className="flex flex-col sm:flex-row shadow-none overflow-hidden rounded-md border-none bg-transparent"
-        >
-        <Image src="/placeholder.jpeg" alt="image" width={536} height={302} className="w-[536px] h-[302px] object-cover rounded-sm" />
-        <CardContent className="px-0 py-0 flex flex-col max-w-xl">
-
-          <div className="flex items-start gap-6 mt-2">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" /> Ağustos 23, 2025
-            </div>
-          </div>
-
-          <h3 className="mt-4 text-2xl font-semibold tracking-tight my-5">
-            A beginner&apos;s guide to blackchain for engineers
-          </h3>
-          <p className="mt-2 text-muted-foreground line-clamp-2 text-ellipsis mr-4">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ipsa
-            consequatur minus dicta accusantium quos, ratione suscipit id
-            adipisci voluptatibus. Nulla sint repudiandae fugiat tenetur
-            dolores.
-          </p>
-
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-  )
+interface Post {
+  id: number;
+  title: string;
+  content: string | null;
+  slug: string;
+  excerpt: string | null;
+  featured: boolean;
+  status: string;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  author: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+  category: {
+    id: number;
+    name: string;
+    slug: string;
+    color: string | null;
+  } | null;
+  _count: {
+    comments: number;
+    likes: number;
+  };
 }
 
-export default BlogList
+interface BlogListProps {
+  posts: Post[];
+}
+
+const BlogList = ({ posts }: BlogListProps) => {
+  if (posts.length === 0) {
+    return (
+      <div className="mt-8 text-center py-12">
+        <p className="text-muted-foreground text-lg">
+          Henüz gönderi bulunmuyor.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 space-y-12">
+      {posts.map((post) => (
+        <Card
+          key={post.id}
+          className="flex flex-col sm:flex-row shadow-none overflow-hidden rounded-md border-none bg-transparent"
+        >
+          <Link href={`/blog/${post.slug}`} className="w-[400px] h-[256px] bg-muted rounded-[1px] flex items-center justify-center">
+            <Image
+              src="/placeholder2.jpeg"
+              alt={post.title}
+              width={400}
+              height={302}
+              className="w-full h-[256px] object-cover"
+            />
+          </Link>
+          <CardContent className="px-0 py-0 flex flex-col max-w-lg">
+            <div className="flex items-start gap-6 mt-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                {new Date(post.createdAt).toLocaleDateString("tr-TR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+              {post.category && (
+                <Badge
+                  variant="secondary"
+                  className="text-xs"
+                  style={{
+                    backgroundColor: post.category.color
+                      ? `${post.category.color}20`
+                      : undefined,
+                    color: post.category.color || undefined,
+                  }}
+                >
+                  {post.category.name}
+                </Badge>
+              )}
+            </div>
+
+            <Link href={`/blog/${post.slug}`}>
+              <h3 className="mt-4 text-2xl font-semibold tracking-tight my-5 hover:text-primary transition-colors cursor-pointer">
+                {post.title}
+              </h3>
+            </Link>
+
+            <p className="mt-2 text-muted-foreground line-clamp-2 text-ellipsis mr-4">
+              {post.excerpt ||
+                post.content?.substring(0, 200) + "..." ||
+                "İçerik mevcut değil."}
+            </p>
+
+            <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Heart className="h-4 w-4" />
+                {post._count.likes}
+              </div>
+              <div className="flex items-center gap-1">
+                <MessageCircle className="h-4 w-4" />
+                {post._count.comments}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+export default BlogList;
