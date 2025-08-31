@@ -12,19 +12,19 @@ const AdminLayout = async ({
   children: React.ReactNode;
 }>) => {
 
-  // const session = await auth.api.getSession({
-  //   headers: await headers()
-  // });
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
 
-  // // Session Control
-  // if (!session) {
-  //   redirect("/login");
-  // }
+  // Session Control
+  if (!session) {
+    redirect("/login");
+  }
 
-  // // Role Control
-  // if (session.user.role !== "admin") {
-  //     redirect("/unauthorized");
-  // }
+  // Role Control
+  if (session.user.role !== "admin") {
+      redirect("/unauthorized");
+  }
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";

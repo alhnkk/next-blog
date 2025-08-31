@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link";
 import { LogOut, Settings, Shield, User2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -10,16 +11,15 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import { 
     Avatar,
     AvatarFallback, 
     AvatarImage 
 } from "@/components/ui/avatar"
 
-import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { useSession, signOut } from "@/lib/auth-client";
 
 const UserNav = () => {
     const router = useRouter();
@@ -52,7 +52,7 @@ const UserNav = () => {
                                 <span className="text-sm text-muted-foreground">{session.user.email}</span>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                           <Link href="/profile">
+                           <Link href="/user">
                                 <DropdownMenuItem>
                                     <User2 className="h-[1.2rem] w-[1.2rem] mr-2" />
                                     Profil

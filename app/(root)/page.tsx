@@ -24,7 +24,6 @@ const BlogPage = async ({
   const selectedCategoryName = resolvedSearchParams.category
     ? categories.find((cat) => cat.slug === resolvedSearchParams.category)?.name
     : null;
-
   return (
     <div className="max-w-7xl mx-auto py-10 lg:py-16 px-6 xl:px-0 flex flex-col lg:flex-row items-start justify-between gap-x-4">
       <div className="w-5/6">

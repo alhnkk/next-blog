@@ -55,7 +55,7 @@ const BlogList = ({ posts }: BlogListProps) => {
           key={post.id}
           className="flex flex-col sm:flex-row shadow-none overflow-hidden rounded-md border-none bg-transparent"
         >
-          <Link href={`/blog/${post.slug}`} className="w-[400px] h-[256px] bg-muted rounded-[1px] flex items-center justify-center">
+          <Link href={`/post/${post.id}`} className="w-[400px] h-[256px] bg-muted rounded-[1px] flex items-center justify-center">
             <Image
               src="/placeholder2.jpeg"
               alt={post.title}
@@ -90,7 +90,7 @@ const BlogList = ({ posts }: BlogListProps) => {
               )}
             </div>
 
-            <Link href={`/blog/${post.slug}`}>
+            <Link href={`/post/${post.id}`}>
               <h3 className="mt-4 text-2xl font-semibold tracking-tight my-5 hover:text-primary transition-colors cursor-pointer">
                 {post.title}
               </h3>

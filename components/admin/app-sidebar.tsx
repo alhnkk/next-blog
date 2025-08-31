@@ -6,7 +6,6 @@ import {
   Folder,
   Users,
   PlusCircle,
-  ChevronDown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -20,16 +19,10 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
-import { Collapsible } from "@/components/ui/collapsible";
-import {
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@radix-ui/react-collapsible";
 import UserNav from "@/components/user-nav";
 
 const AppSidebar = () => {
@@ -83,33 +76,16 @@ const AppSidebar = () => {
           <SidebarGroupLabel>İÇERİK</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
-                      <Book />
-                      <span className="group-data-[collapsible=icon]:hidden">
-                        Gönderiler
-                      </span>
-                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenu className="mt-2 space-y-1">
-                      <SidebarMenuItem>
-                        <SidebarMenuSub>
-                          <Link href="admin/posts">
-                            <span>Tüm Gönderiler</span>
-                          </Link>
-                          <Link href="admin/posts/new">
-                            <span>Yeni Gönderi</span>
-                          </Link>
-                        </SidebarMenuSub>
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+            <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin/posts">
+                    <Book />
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      Gönderiler
+                    </span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link href="/">

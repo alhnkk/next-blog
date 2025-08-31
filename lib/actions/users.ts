@@ -13,6 +13,9 @@ export async function getUsers() {
         email: true,
         emailVerified: true,
         image: true,
+        bio: true,
+        location: true,
+        phone: true,
         createdAt: true,
         updatedAt: true,
         role: true,
@@ -49,6 +52,7 @@ export async function getUserById(userId: string) {
         id: true,
         name: true,
         email: true,
+        emailVerified: true,
         image: true,
         bio: true,
         location: true,
@@ -56,6 +60,9 @@ export async function getUserById(userId: string) {
         createdAt: true,
         updatedAt: true,
         role: true,
+        banned: true,
+        banReason: true,
+        banExpires: true,
       },
     });
 
@@ -124,7 +131,7 @@ export async function updateUserProfile(
       },
     });
 
-    revalidatePath("/profile");
+    revalidatePath("/user");
 
     return {
       success: true,
@@ -178,4 +185,3 @@ export async function deleteUser(userId: string) {
     };
   }
 }
-
