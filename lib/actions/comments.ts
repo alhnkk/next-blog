@@ -21,6 +21,11 @@ export async function getCommentsByPostId(postId: number) {
             image: true,
           },
         },
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
         replies: {
           where: {
             approved: true,
@@ -33,6 +38,11 @@ export async function getCommentsByPostId(postId: number) {
                 image: true,
               },
             },
+            _count: {
+              select: {
+                likes: true,
+              },
+            },
             replies: {
               where: {
                 approved: true,
@@ -43,6 +53,11 @@ export async function getCommentsByPostId(postId: number) {
                     id: true,
                     name: true,
                     image: true,
+                  },
+                },
+                _count: {
+                  select: {
+                    likes: true,
                   },
                 },
               },

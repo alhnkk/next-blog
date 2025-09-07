@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CommentForm } from "./comment-form";
 import { deleteComment, updateComment } from "@/lib/actions/comments";
+import { toggleCommentLike, getCommentLikeStatus } from "@/lib/actions/comment-likes";
 import { toast } from "@/hooks/use-toast";
 import {
   MoreHorizontal,
@@ -15,6 +16,7 @@ import {
   Check,
   X,
   Loader2,
+  Heart,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -44,6 +46,9 @@ interface Comment {
     image?: string;
   };
   replies?: Comment[];
+  _count?: {
+    likes: number;
+  };
 }
 
 interface CommentItemProps {
@@ -70,6 +75,9 @@ export function CommentItem({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(comment._count?.likes || 0);
+  const [isLiking, setIsLiking] = useState(false);
 
 
   const isOwner = currentUser?.id === comment.author.id;
@@ -81,6 +89,78 @@ export function CommentItem({
   const createdAt = new Date(comment.createdAt);
   const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
   const canEditTime = createdAt > fifteenMinutesAgo;
+
+  // Like durumunu yükle
+  useEffect(() => {
+    if (currentUser) {
+      loadLikeStatus();
+    }
+  }, [comment.id, currentUser]);
+
+  const loadLikeStatus = async () => {
+    try {
+      const result = await getCommentLikeStatus(comment.id);
+      if (result.success && result.data) {
+        setLiked(result.data.liked);
+        setLikeCount(result.data.likeCount);
+      }
+    } catch (error) {
+      console.error("Error loading comment like status:", error);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!currentUser) {
+      toast({
+        title: "Giriş Gerekli",
+        description: "Beğenmek için giriş yapmalısınız",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isLiking) return;
+
+    setIsLiking(true);
+
+    // Optimistic update
+    const previousLiked = liked;
+    const previousCount = likeCount;
+    
+    setLiked(!liked);
+    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+
+    try {
+      const result = await toggleCommentLike(comment.id);
+
+      if (result.success && result.data) {
+        setLiked(result.data.liked);
+        setLikeCount(result.data.likeCount);
+      } else {
+        // Revert optimistic update
+        setLiked(previousLiked);
+        setLikeCount(previousCount);
+        
+        toast({
+          title: "Hata",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      // Revert optimistic update
+      setLiked(previousLiked);
+      setLikeCount(previousCount);
+      
+      toast({
+        title: "Hata",
+        description: "Beğeni işlemi sırasında bir hata oluştu",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLiking(false);
+    }
+  };
 
   const handleReplySuccess = () => {
     setShowReplyForm(false);
@@ -299,17 +379,38 @@ export function CommentItem({
                 {comment.content}
               </p>
 
-              {currentUser && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowReplyForm(!showReplyForm)}
-                  className="h-6 px-2 text-xs"
-                >
-                  <Reply className="h-3 w-3 mr-1" />
-                  Yanıtla
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {currentUser && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLike}
+                    disabled={isLiking}
+                    className={`h-6 px-2 text-xs transition-all duration-200 ${
+                      liked ? "text-red-500 hover:text-red-600" : ""
+                    }`}
+                  >
+                    <Heart
+                      className={`h-3 w-3 mr-1 transition-all duration-200 ${
+                        liked ? "fill-current scale-110" : ""
+                      }`}
+                    />
+                    {likeCount > 0 && likeCount}
+                  </Button>
+                )}
+                
+                {currentUser && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowReplyForm(!showReplyForm)}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <Reply className="h-3 w-3 mr-1" />
+                    Yanıtla
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 

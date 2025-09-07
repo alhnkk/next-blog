@@ -260,15 +260,15 @@ export function CommentsManagement() {
       {/* Comments Table */}
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px] min-w-[180px]">Yazar</TableHead>
+                <TableHead className="w-[180px] min-w-[160px] sticky left-0 bg-background z-10">Yazar</TableHead>
                 <TableHead className="w-[300px] min-w-[250px]">İçerik</TableHead>
                 <TableHead className="w-[200px] min-w-[150px]">Gönderi</TableHead>
-                <TableHead className="w-[120px] min-w-[100px]">Durum</TableHead>
-                <TableHead className="w-[140px] min-w-[120px]">Tarih</TableHead>
-                <TableHead className="w-[60px] min-w-[50px]"></TableHead>
+                <TableHead className="w-[100px] min-w-[80px]">Durum</TableHead>
+                <TableHead className="w-[120px] min-w-[100px]">Tarih</TableHead>
+                <TableHead className="w-[50px] min-w-[40px] sticky right-0 bg-background z-10"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -283,7 +283,7 @@ export function CommentsManagement() {
               ) : (
                 filteredComments.map((comment) => (
                   <TableRow key={comment.id} className="hover:bg-muted/50">
-                    <TableCell className="py-3">
+                    <TableCell className="py-3 sticky left-0 bg-background z-10">
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarImage
@@ -337,7 +337,7 @@ export function CommentsManagement() {
                         {formatDate(comment.createdAt)}
                       </div>
                     </TableCell>
-                    <TableCell className="py-3">
+                    <TableCell className="py-3 sticky right-0 bg-background z-10">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button

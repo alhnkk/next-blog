@@ -81,7 +81,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true)
-  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false)
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(true) // Edit modunda başlangıçta true
 
   // Load categories on mount
   useEffect(() => {
@@ -304,15 +304,30 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Slug</Label>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <span className="text-xs sm:text-sm">https://yourblog.com/post/</span>
-                  <Input
-                    placeholder="yazi-linki"
-                    value={slug}
-                    onChange={(e) => {
-                      setSlug(e.target.value)
-                      setIsSlugManuallyEdited(true)
-                    }}
-                    className="text-lg lg:text-xl font-bold border-b border-x-0 border-t-0 bg-accent border rounded-none px-2 py-2 focus-visible:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:bg-background dark:text-gray-100"
-                  />
+                  <div className="flex gap-2 flex-1">
+                    <Input
+                      placeholder="yazi-linki"
+                      value={slug}
+                      onChange={(e) => {
+                        setSlug(e.target.value)
+                        setIsSlugManuallyEdited(true)
+                      }}
+                      className="text-lg lg:text-xl font-bold border-b border-x-0 border-t-0 bg-accent border rounded-none px-2 py-2 focus-visible:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:bg-background dark:text-gray-100 flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const generatedSlug = generateSlug(title)
+                        setSlug(generatedSlug)
+                        setIsSlugManuallyEdited(false)
+                      }}
+                      className="whitespace-nowrap"
+                    >
+                      Otomatik
+                    </Button>
+                  </div>
                 </div>
               </div>
 

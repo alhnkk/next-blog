@@ -164,7 +164,7 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/">
+                  <Link href="/admin/settings">
                     <Settings />
                     <span className="group-data-[collapsible=icon]:hidden">
                       Ayarlar
