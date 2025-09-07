@@ -63,6 +63,59 @@ export async function getUserById(userId: string) {
         banned: true,
         banReason: true,
         banExpires: true,
+        _count: {
+          posts: true,
+          comments: true,
+        },
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "Kullanıcı bulunamadı",
+      };
+    }
+
+    return {
+      success: true,
+      data: user,
+    };
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return {
+      success: false,
+      error: "Kullanıcı bilgileri alınırken hata oluştu",
+    };
+  }
+}
+
+// GET USER BY EMAIL (for username lookup)
+export async function getUserByEmail(email: string) {
+  try {
+    const user = await prismadb.user.findUnique({
+      where: {
+        email: email,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        bio: true,
+        location: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+        role: true,
+        banned: true,
+        banReason: true,
+        banExpires: true,
+        _count: {
+          posts: true,
+          comments: true,
+        },
       },
     });
 
@@ -95,6 +148,7 @@ export async function updateUserProfile(
     location?: string;
     phone?: string;
     image?: string;
+    email?: string;
   }
 ) {
   try {
@@ -109,6 +163,22 @@ export async function updateUserProfile(
         success: false,
         error: "Kullanıcı bulunamadı",
       };
+    }
+
+    // Email değişikliği varsa, başka kullanıcı tarafından kullanılıp kullanılmadığını kontrol et
+    if (data.email && data.email !== user.email) {
+      const existingUser = await prismadb.user.findUnique({
+        where: {
+          email: data.email,
+        },
+      });
+
+      if (existingUser && existingUser.id !== userId) {
+        return {
+          success: false,
+          error: "Bu e-posta adresi başka bir kullanıcı tarafından kullanılıyor",
+        };
+      }
     }
 
     const updatedUser = await prismadb.user.update({
@@ -131,7 +201,9 @@ export async function updateUserProfile(
       },
     });
 
+    revalidatePath("/profile");
     revalidatePath("/user");
+    revalidatePath("/");
 
     return {
       success: true,
@@ -146,6 +218,8 @@ export async function updateUserProfile(
     };
   }
 }
+
+
 
 // DELETE USER
 export async function deleteUser(userId: string) {
@@ -182,6 +256,92 @@ export async function deleteUser(userId: string) {
     return {
       success: false,
       error: "Kullanıcı silinirken hata oluştu",
+    };
+  }
+}
+
+// BAN USER
+export async function banUser(userId: string, reason?: string, expiresAt?: Date) {
+  try {
+    const user = await prismadb.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "Kullanıcı bulunamadı",
+      };
+    }
+
+    await prismadb.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        banned: true,
+        banReason: reason || "Belirtilmemiş",
+        banExpires: expiresAt || null,
+        updatedAt: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      message: "Kullanıcı başarıyla yasaklandı",
+    };
+  } catch (error) {
+    console.error("Error banning user:", error);
+    return {
+      success: false,
+      error: "Kullanıcı yasaklanırken hata oluştu",
+    };
+  }
+}
+
+// UNBAN USER
+export async function unbanUser(userId: string) {
+  try {
+    const user = await prismadb.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "Kullanıcı bulunamadı",
+      };
+    }
+
+    await prismadb.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        banned: false,
+        banReason: null,
+        banExpires: null,
+        updatedAt: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      message: "Kullanıcının yasağı başarıyla kaldırıldı",
+    };
+  } catch (error) {
+    console.error("Error unbanning user:", error);
+    return {
+      success: false,
+      error: "Kullanıcının yasağı kaldırılırken hata oluştu",
     };
   }
 }

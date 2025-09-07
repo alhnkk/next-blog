@@ -25,7 +25,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { deleteUser } from "@/lib/actions/users";
+import {
+  deleteUser,
+  banUser,
+  unbanUser,
+} from "@/lib/actions/users";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export type Users = {
   id: string;
@@ -41,22 +48,132 @@ export type Users = {
   updatedAt: Date;
 };
 
-// Kullanıcı silme fonksiyonu
-const handleDeleteUser = async (userId: string, userName: string) => {
-  try {
-    const result = await deleteUser(userId);
+// Cell Actions Component
+const CellActions = ({ user }: { user: Users }) => {
+  const router = useRouter();
 
-    if (result.success) {
-      alert(`${userName} başarıyla silindi`);
-      // Sayfayı yenile
-      window.location.reload();
-    } else {
-      alert(result.error || "Kullanıcı silinirken hata oluştu");
+  const handleDeleteUser = async () => {
+    try {
+      const result = await deleteUser(user.id);
+
+      if (result.success) {
+        toast.success(`${user.name} başarıyla silindi`);
+        router.refresh();
+      } else {
+        toast.error(result.error || "Kullanıcı silinirken hata oluştu");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Beklenmeyen bir hata oluştu");
     }
-  } catch (error) {
-    console.error("Delete error:", error);
-    alert("Beklenmeyen bir hata oluştu");
-  }
+  };
+
+  const handleBanToggle = async () => {
+    try {
+      if (user.banned) {
+        // Yasağı kaldır
+        const result = await unbanUser(user.id);
+        if (result.success) {
+          toast.success(result.message);
+          router.refresh();
+        } else {
+          toast.error(result.error);
+        }
+      } else {
+        // Kullanıcıyı yasakla
+        const banReason = prompt("Yasak sebebi (opsiyonel):");
+        const result = await banUser(user.id, banReason || "Belirtilmemiş");
+        if (result.success) {
+          toast.success(result.message);
+          router.refresh();
+        } else {
+          toast.error(result.error);
+        }
+      }
+    } catch (error) {
+      toast.error("İşlem sırasında hata oluştu");
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Menüyü aç</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+        <DropdownMenuItem
+          onClick={() => {
+            navigator.clipboard.writeText(user.email);
+            toast.success("Email kopyalandı");
+          }}
+        >
+          Emaili Kopyala
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            navigator.clipboard.writeText(user.id);
+            toast.success("ID kopyalandı");
+          }}
+        >
+          ID Kopyala
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={`/admin/users/${user.id}`}>Kullanıcıyı Görüntüle</Link>
+        </DropdownMenuItem>
+        {user.banned ? (
+          <DropdownMenuItem
+            className="text-green-600"
+            onClick={handleBanToggle}
+          >
+            Yasağı Kaldır
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem
+            className="text-orange-600"
+            onClick={handleBanToggle}
+          >
+            Kullanıcıyı Yasakla
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem
+              className="text-red-600 cursor-pointer"
+              onSelect={(e) => e.preventDefault()}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Kullanıcıyı Sil
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Kullanıcıyı Sil</AlertDialogTitle>
+              <AlertDialogDescription>
+                <strong>{user.name}</strong> kullanıcısını silmek istediğinizden
+                emin misiniz? Bu işlem geri alınamaz ve kullanıcının tüm
+                verileri kalıcı olarak silinecektir.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>İptal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteUser}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Evet, Sil
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 };
 
 export const columns: ColumnDef<Users>[] = [
@@ -147,8 +264,7 @@ export const columns: ColumnDef<Users>[] = [
         <div
           className={cn(
             `p-1 rounded-md w-max text-xs font-medium`,
-            role === "admin" &&
-              "bg-blue-500/20 text-blue-800 border border-blue-200",
+            role === "admin" && "bg-blue-500/20 text-blue-800",
             (role === "user" || !role) && "bg-green-500/20 text-green-800"
           )}
         >
@@ -213,73 +329,7 @@ export const columns: ColumnDef<Users>[] = [
     id: "actions",
     cell: ({ row }) => {
       const user = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Menüyü aç</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.email)}
-            >
-              Email&apos;i Kopyala
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.id)}
-            >
-              ID Kopyala
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Kullanıcıyı Görüntüle</DropdownMenuItem>
-            <DropdownMenuItem>Kullanıcıyı Düzenle</DropdownMenuItem>
-            {user.banned ? (
-              <DropdownMenuItem className="text-green-600">
-                Yasağı Kaldır
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem className="text-orange-600">
-                Kullanıcıyı Yasakla
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  className="text-red-600 cursor-pointer"
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Kullanıcıyı Sil
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Kullanıcıyı Sil</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <strong>{user.name}</strong> kullanıcısını silmek
-                    istediğinizden emin misiniz? Bu işlem geri alınamaz ve
-                    kullanıcının tüm verileri kalıcı olarak silinecektir.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>İptal</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDeleteUser(user.id, user.name)}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Evet, Sil
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <CellActions user={user} />;
     },
   },
 ];

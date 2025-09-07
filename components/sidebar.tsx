@@ -1,19 +1,19 @@
 "use client";
 
 import {
-    BrainCog,
-    Clapperboard,
-    Newspaper,
-    NotebookPen,
-    Pen,
-    SquareActivity,
-    Hash,
-  } from "lucide-react";
-  
+  BrainCog,
+  Clapperboard,
+  Newspaper,
+  NotebookPen,
+  Pen,
+  SquareActivity,
+  Hash,
+} from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AdPlaceholder } from "@/components/ad-placeholder";
 
 interface Category {
   id: number;
@@ -35,7 +35,7 @@ interface SidebarProps {
 }
 
 // Icon mapping for categories
-const iconMap: { [key: string]: any } = {
+const iconMap: { [key: string]: unknown } = {
   pen: Pen,
   clapperboard: Clapperboard,
   newspaper: Newspaper,
@@ -51,20 +51,18 @@ const Sidebar = ({ categories, selectedCategory }: SidebarProps) => {
 
   const handleCategoryClick = (categorySlug: string) => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (selectedCategory === categorySlug) {
       // Aynı kategoriye tıklanırsa filtreyi kaldır
-      params.delete('category');
+      params.delete("category");
     } else {
       // Yeni kategori seç
-      params.set('category', categorySlug);
+      params.set("category", categorySlug);
     }
-    
+
     const queryString = params.toString();
-    router.push(queryString ? `/?${queryString}` : '/');
+    router.push(queryString ? `/?${queryString}` : "/");
   };
-
-
 
   if (categories.length === 0) {
     return (
@@ -81,9 +79,11 @@ const Sidebar = ({ categories, selectedCategory }: SidebarProps) => {
       <div className="mt-4 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-2">
         {/* Kategoriler */}
         {categories.map((category) => {
-          const IconComponent = category.icon ? iconMap[category.icon.toLowerCase()] || Hash : Hash;
+          const IconComponent = category.icon
+            ? iconMap[category.icon.toLowerCase()] || Hash
+            : Hash;
           const isSelected = selectedCategory === category.slug;
-          
+
           return (
             <div
               key={category.id}
@@ -91,21 +91,21 @@ const Sidebar = ({ categories, selectedCategory }: SidebarProps) => {
               className={cn(
                 "flex items-center justify-between gap-2 p-3 rounded-md cursor-pointer hover:bg-muted/80 transition-colors",
                 isSelected && "ring-2 ring-primary",
-                category.color 
+                category.color
                   ? `bg-[${category.color}]/10 hover:bg-[${category.color}]/20`
                   : "bg-muted"
               )}
               style={{
-                backgroundColor: category.color 
-                  ? `${category.color}15` 
-                  : undefined
+                backgroundColor: category.color
+                  ? `${category.color}15`
+                  : undefined,
               }}
             >
               <div className="flex items-center gap-3">
-                <IconComponent 
-                  className="h-5 w-5" 
-                  style={{ 
-                    color: category.color || undefined 
+                <IconComponent
+                  className="h-5 w-5"
+                  style={{
+                    color: category.color || undefined,
                   }}
                 />
                 <span className="font-medium">{category.name}</span>
@@ -117,6 +117,7 @@ const Sidebar = ({ categories, selectedCategory }: SidebarProps) => {
           );
         })}
       </div>
+      <AdPlaceholder />
     </div>
   );
 };

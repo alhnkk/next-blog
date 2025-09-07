@@ -7,8 +7,16 @@ import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
-import { useEffect } from "react";
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import Typography from "@tiptap/extension-typography";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Bold,
   Italic,
@@ -22,6 +30,11 @@ import {
   Quote,
   Undo,
   Redo,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Palette,
+  Type,
+  Minus,
 } from "lucide-react";
 
 interface RichTextEditorProps {
@@ -39,6 +52,11 @@ export default function RichTextEditor({
   editable = true,
   className = "",
 }: RichTextEditorProps) {
+  const [linkUrl, setLinkUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
+  const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -61,6 +79,20 @@ export default function RichTextEditor({
         },
       }),
       ListItem,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 dark:text-blue-400 underline cursor-pointer',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-xs',
+        },
+      }),
+      Typography,
+      TextStyle,
+      Color,
       Placeholder.configure({
         placeholder: placeholder,
       }),
@@ -72,7 +104,40 @@ export default function RichTextEditor({
       onChange?.(html);
     },
     immediatelyRender: false,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-lg dark:prose-invert max-w-full focus:outline-none',
+      },
+    },
   });
+
+  const addLink = useCallback(() => {
+    if (linkUrl && editor) {
+      editor.chain().focus().setLink({ href: linkUrl }).run();
+      setLinkUrl("");
+      setIsLinkPopoverOpen(false);
+    }
+  }, [editor, linkUrl]);
+
+  const removeLink = useCallback(() => {
+    if (editor) {
+      editor.chain().focus().unsetLink().run();
+    }
+  }, [editor]);
+
+  const addImage = useCallback(() => {
+    if (imageUrl && editor) {
+      editor.chain().focus().setImage({ src: imageUrl }).run();
+      setImageUrl("");
+      setIsImagePopoverOpen(false);
+    }
+  }, [editor, imageUrl]);
+
+  const addHorizontalRule = useCallback(() => {
+    if (editor) {
+      editor.chain().focus().setHorizontalRule().run();
+    }
+  }, [editor]);
 
   useEffect(() => {
     if (editor && initialContent !== editor.getHTML()) {
@@ -81,170 +146,311 @@ export default function RichTextEditor({
   }, [initialContent, editor]);
 
   if (!editor) {
-    return <div className="h-32 bg-gray-100 animate-pulse rounded border" />;
+    return <div className="h-32 bg-gray-100 animate-pulse rounded-xs border" />;
   }
 
   return (
-    <div className={`rich-text-editor border rounded-none ${className}`}>
+    <div className={`rich-text-editor border rounded-xs ${className}`}>
       {/* Toolbar */}
-      <div className="border-b p-2 flex flex-wrap items-center gap-1 bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
+      <div className="border-b p-3 flex flex-wrap items-center gap-1 bg-gray-50 dark:bg-gray-800 sticky top-0 z-10 rounded-t-xs">
         {/* Text Formatting */}
-        <Button
-          variant={editor.isActive("bold") ? "default" : "ghost"}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className="h-8 w-8 p-0"
-          title="Bold (Ctrl+B)"
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant={editor.isActive("bold") ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleBold().run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Bold (Ctrl+B)"
+            type="button"
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={editor.isActive("italic") ? "default" : "ghost"}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className="h-8 w-8 p-0"
-          title="Italic (Ctrl+I)"
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={editor.isActive("italic") ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleItalic().run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Italic (Ctrl+I)"
+            type="button"
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={editor.isActive("strike") ? "default" : "ghost"}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className="h-8 w-8 p-0"
-          title="Strikethrough"
-        >
-          <Strikethrough className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={editor.isActive("strike") ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleStrike().run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Strikethrough"
+            type="button"
+          >
+            <Strikethrough className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={editor.isActive("code") ? "default" : "ghost"}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          className="h-8 w-8 p-0"
-          title="Inline Code"
-        >
-          <Code className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={editor.isActive("code") ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleCode().run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Inline Code"
+            type="button"
+          >
+            <Code className="h-4 w-4" />
+          </Button>
+        </div>
 
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
 
         {/* Headings */}
-        <Button
-          variant={
-            editor.isActive("heading", { level: 1 }) ? "default" : "ghost"
-          }
-          size="sm"
-          onClick={() => {
-            console.log("H1 button clicked");
-            editor.chain().focus().toggleHeading({ level: 1 }).run();
-          }}
-          className="h-8 w-8 p-0"
-          title="Heading 1"
-        >
-          <Heading1 className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant={
+              editor.isActive("heading", { level: 1 }) ? "default" : "ghost"
+            }
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleHeading({ level: 1 }).run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Heading 1"
+            type="button"
+          >
+            <Heading1 className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={
-            editor.isActive("heading", { level: 2 }) ? "default" : "ghost"
-          }
-          size="sm"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-          className="h-8 w-8 p-0"
-          title="Heading 2"
-        >
-          <Heading2 className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={
+              editor.isActive("heading", { level: 2 }) ? "default" : "ghost"
+            }
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleHeading({ level: 2 }).run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Heading 2"
+            type="button"
+          >
+            <Heading2 className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={
-            editor.isActive("heading", { level: 3 }) ? "default" : "ghost"
-          }
-          size="sm"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
-          }
-          className="h-8 w-8 p-0"
-          title="Heading 3"
-        >
-          <Heading3 className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={
+              editor.isActive("heading", { level: 3 }) ? "default" : "ghost"
+            }
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleHeading({ level: 3 }).run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Heading 3"
+            type="button"
+          >
+            <Heading3 className="h-4 w-4" />
+          </Button>
+        </div>
 
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
 
         {/* Lists */}
-        <Button
-          variant={editor.isActive("bulletList") ? "default" : "ghost"}
-          size="sm"
-          onClick={() => {
-            console.log("Bullet list button clicked");
-            editor.chain().focus().toggleBulletList().run();
-          }}
-          className="h-8 w-8 p-0"
-          title="Bullet List"
-        >
-          <List className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant={editor.isActive("bulletList") ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleBulletList().run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Bullet List"
+            type="button"
+          >
+            <List className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant={editor.isActive("orderedList") ? "default" : "ghost"}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className="h-8 w-8 p-0"
-          title="Numbered List"
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
+          <Button
+            variant={editor.isActive("orderedList") ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleOrderedList().run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Numbered List"
+            type="button"
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
 
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+          <Button
+            variant={editor.isActive("blockquote") ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().toggleBlockquote().run();
+            }}
+            className="h-8 w-8 p-0"
+            title="Blockquote"
+            type="button"
+          >
+            <Quote className="h-4 w-4" />
+          </Button>
+        </div>
 
-        {/* Quote */}
-        <Button
-          variant={editor.isActive("blockquote") ? "default" : "ghost"}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className="h-8 w-8 p-0"
-          title="Blockquote"
-        >
-          <Quote className="h-4 w-4" />
-        </Button>
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
 
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+        {/* Links and Images */}
+        <div className="flex items-center gap-1">
+          <Popover open={isLinkPopoverOpen} onOpenChange={setIsLinkPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant={editor.isActive("link") ? "default" : "ghost"}
+                size="sm"
+                className="h-8 w-8 p-0"
+                title="Add Link"
+                type="button"
+              >
+                <LinkIcon className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="link-url">Link URL</Label>
+                  <Input
+                    id="link-url"
+                    placeholder="https://example.com"
+                    value={linkUrl}
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addLink();
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={addLink} size="sm" className="flex-1">
+                    Link Ekle
+                  </Button>
+                  {editor.isActive("link") && (
+                    <Button onClick={removeLink} variant="outline" size="sm">
+                      Kaldır
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Popover open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                title="Add Image"
+                type="button"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="image-url">Resim URL</Label>
+                  <Input
+                    id="image-url"
+                    placeholder="https://example.com/image.jpg"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addImage();
+                      }
+                    }}
+                  />
+                </div>
+                <Button onClick={addImage} size="sm" className="w-full">
+                  Resim Ekle
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              addHorizontalRule();
+            }}
+            className="h-8 w-8 p-0"
+            title="Horizontal Rule"
+            type="button"
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
 
         {/* Undo/Redo */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-          className="h-8 w-8 p-0"
-          title="Undo (Ctrl+Z)"
-        >
-          <Undo className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().undo().run();
+            }}
+            disabled={!editor.can().undo()}
+            className="h-8 w-8 p-0"
+            title="Undo (Ctrl+Z)"
+            type="button"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-          className="h-8 w-8 p-0"
-          title="Redo (Ctrl+Y)"
-        >
-          <Redo className="h-4 w-4" />
-        </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              editor.chain().focus().redo().run();
+            }}
+            disabled={!editor.can().redo()}
+            className="h-8 w-8 p-0"
+            title="Redo (Ctrl+Y)"
+            type="button"
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Editor Content */}
-      <div className="max-h-[300px] overflow-y-auto">
+      <div className="min-h-[400px] max-h-[600px] overflow-y-auto">
         <EditorContent
           editor={editor}
-          className="min-h-[300px] w-full p-4 prose prose-lg dark:prose-invert max-w-full outline-none focus:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:focus:outline-none [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-bold [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:ml-6 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:ml-6 [&_.ProseMirror_li]:mb-1"
+          className="w-full p-4 prose prose-lg dark:prose-invert max-w-full outline-none focus:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:min-h-[350px] [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:mt-6 [&_.ProseMirror_h1]:mb-4 [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:mt-5 [&_.ProseMirror_h2]:mb-3 [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-bold [&_.ProseMirror_h3]:mt-4 [&_.ProseMirror_h3]:mb-2 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:ml-6 [&_.ProseMirror_ul]:my-3 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:ml-6 [&_.ProseMirror_ol]:my-3 [&_.ProseMirror_li]:mb-1 [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-gray-300 [&_.ProseMirror_blockquote]:dark:border-gray-600 [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_blockquote]:my-4 [&_.ProseMirror_code]:bg-gray-100 [&_.ProseMirror_code]:dark:bg-gray-800 [&_.ProseMirror_code]:px-1 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:text-sm [&_.ProseMirror_p]:my-2 [&_.ProseMirror_hr]:border-gray-300 [&_.ProseMirror_hr]:dark:border-gray-600 [&_.ProseMirror_hr]:my-6 [&_.ProseMirror_img]:rounded-lg [&_.ProseMirror_img]:shadow-md [&_.ProseMirror_img]:my-4"
         />
       </div>
     </div>

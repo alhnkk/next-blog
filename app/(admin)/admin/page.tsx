@@ -8,7 +8,7 @@ import { useTheme } from "next-themes";
 import { AppBarChart } from "@/components/admin/app-bar-chart";
 import AppPieChart from "@/components/admin/app-pie-chart";
 import CardList from "@/components/admin/card-list";
-import TodoList from "@/components/admin/todo-list";
+import { RecentComments } from "@/components/admin/recent-comments";
 import { Button } from "@/components/ui/button";
 
 const AdminDashboard = () => {
@@ -58,7 +58,7 @@ const AdminDashboard = () => {
     </div>
     <div className="bg-primary-foreground p-4 rounded-md"><CardList title="Son Üyeler" /></div>
     <div className="bg-primary-foreground p-4 rounded-md"><AppPieChart /></div>
-    <div className="bg-primary-foreground p-4 rounded-md"><TodoList /></div>
+    <div className="bg-primary-foreground p-4 rounded-md"><RecentComments /></div>
     <div className="bg-primary-foreground p-4 rounded-md lg:col-span-2 xl:col-span-1 2xl:col-span-2">
       <AppBarChart />
     </div>

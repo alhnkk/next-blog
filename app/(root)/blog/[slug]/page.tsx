@@ -1,12 +1,14 @@
 import { getPostBySlug } from "@/lib/actions/posts";
+import { getCommentsByPostId } from "@/lib/actions/comments";
+import { auth } from "@/lib/auth";
+import { LikeButton } from "@/components/like-button";
 import {
-  ArrowLeft,
   MessageSquare,
-  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { CommentsSection } from "@/components/comments-section";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -70,20 +72,33 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
   }
 
   const post = postResult.data as Post;
+  
+  // Yorumları yükle
+  const commentsResult = await getCommentsByPostId(parseInt(post.id));
+  const comments = commentsResult.success ? commentsResult.data : [];
+
+  // Session bilgisini al - basit yaklaşım
+  let currentUser = null;
+  try {
+    const { headers } = await import("next/headers");
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (session?.user) {
+      currentUser = {
+        id: session.user.id,
+        name: session.user.name,
+        image: session.user.image,
+        role: session.user.role,
+      };
+    }
+  } catch (error) {
+    console.log("Session alınamadı:", error);
+  }
 
   return (
     <div className="min-h-screen">
-      {/* Simple Header */}
-      <header className="border-b">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <Link href="/">
-            <Button variant="ghost" className="p-0">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Ana Sayfa
-            </Button>
-          </Link>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-12">
@@ -159,10 +174,13 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
 
             {/* Social Actions */}
             <div className="flex items-center gap-4">
-              <Button variant="ghost" className="flex items-center gap-1">
-                <Heart className="h-4 w-4" />
-                <span className="text-sm">{post._count.likes}</span>
-              </Button>
+              <LikeButton
+                postId={parseInt(post.id)}
+                initialCount={post._count.likes}
+                currentUser={currentUser}
+                variant="ghost"
+                size="default"
+              />
               <Button variant="ghost" className="flex items-center gap-1">
                 <MessageSquare className="h-4 w-4" />
                 <span className="text-sm">{post.comments?.length || 0}</span>
@@ -231,99 +249,12 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
           </div>
         </div>
 
-        <Separator className="my-6" />
-
         {/* Comments Section */}
-        <div className="mt-12 pt-8">
-          <h3 className="text-2xl font-semibold mb-6">
-            Yorumlar ({post.comments?.length || 0})
-          </h3>
-
-          {post.comments && post.comments.length > 0 ? (
-            <div className="space-y-8">
-              {post.comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="border-l-2 border-gray-200 dark:border-gray-700 pl-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={comment.author.image || undefined}
-                        alt={comment.author.name}
-                      />
-                      <AvatarFallback className="text-xs">
-                        {comment.author.name
-                          ?.split(" ")
-                          .map((word: string) => word.charAt(0))
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2) || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-sm">
-                          {comment.author.name}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {new Date(comment.createdAt).toLocaleDateString(
-                            "tr-TR"
-                          )}
-                        </span>
-                      </div>
-                      <p className="leading-relaxed">{comment.content}</p>
-
-                      {/* Replies */}
-                      {comment.replies && comment.replies.length > 0 && (
-                        <div className="mt-4 ml-4 space-y-3">
-                          {comment.replies.map((reply) => (
-                            <div
-                              key={reply.id}
-                              className="flex items-start gap-2"
-                            >
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage
-                                  src={reply.author.image || undefined}
-                                  alt={reply.author.name}
-                                />
-                                <AvatarFallback className="text-xs">
-                                  {reply.author.name?.charAt(0).toUpperCase() ||
-                                    "U"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-medium text-xs">
-                                    {reply.author.name}
-                                  </span>
-                                  <span className="text-xs">
-                                    {new Date(
-                                      reply.createdAt
-                                    ).toLocaleDateString("tr-TR")}
-                                  </span>
-                                </div>
-                                <p className="text-sm leading-relaxed">
-                                  {reply.content}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 dark:text-gray-400">
-                Henüz yorum yapılmamış. İlk yorumu siz yapın!
-              </p>
-            </div>
-          )}
-        </div>
+        <CommentsSection
+          postId={parseInt(post.id)}
+          initialComments={[]}
+          currentUser={currentUser}
+        />
       </main>
     </div>
   );

@@ -1,7 +1,8 @@
-import { Calendar, Heart, MessageCircle } from "lucide-react";
+import { Calendar, MessageCircle } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { LikeButton } from "@/components/like-button";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -35,9 +36,13 @@ interface Post {
 
 interface BlogListProps {
   posts: Post[];
+  currentUser?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
-const BlogList = ({ posts }: BlogListProps) => {
+const BlogList = ({ posts, currentUser }: BlogListProps) => {
   if (posts.length === 0) {
     return (
       <div className="mt-8 text-center py-12">
@@ -55,7 +60,10 @@ const BlogList = ({ posts }: BlogListProps) => {
           key={post.id}
           className="flex flex-col sm:flex-row shadow-none overflow-hidden rounded-md border-none bg-transparent"
         >
-          <Link href={`/post/${post.id}`} className="w-[400px] h-[256px] bg-muted rounded-[1px] flex items-center justify-center">
+          <Link
+            href={`/blog/${post.slug}`}
+            className="w-[400px] h-[256px] bg-muted rounded-[1px] flex items-center justify-center"
+          >
             <Image
               src="/placeholder2.jpeg"
               alt={post.title}
@@ -90,7 +98,7 @@ const BlogList = ({ posts }: BlogListProps) => {
               )}
             </div>
 
-            <Link href={`/post/${post.id}`}>
+            <Link href={`/blog/${post.slug}`}>
               <h3 className="mt-4 text-2xl font-semibold tracking-tight my-5 hover:text-primary transition-colors cursor-pointer">
                 {post.title}
               </h3>
@@ -103,10 +111,14 @@ const BlogList = ({ posts }: BlogListProps) => {
             </p>
 
             <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Heart className="h-4 w-4" />
-                {post._count.likes}
-              </div>
+              <LikeButton
+                postId={post.id}
+                initialCount={post._count.likes}
+                currentUser={currentUser}
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-red-500 p-0 h-auto"
+              />
               <div className="flex items-center gap-1">
                 <MessageCircle className="h-4 w-4" />
                 {post._count.comments}

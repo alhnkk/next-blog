@@ -2,6 +2,7 @@ import BlogList from "@/components/blog-list";
 import Sidebar from "@/components/sidebar";
 import { getPublishedPosts, getPostsByCategorySlug } from "@/lib/actions/posts";
 import { getCategories } from "@/lib/actions/categories";
+import { auth } from "@/lib/auth";
 
 const BlogPage = async ({
   searchParams,
@@ -9,6 +10,24 @@ const BlogPage = async ({
   searchParams: Promise<{ category?: string }>;
 }) => {
   const resolvedSearchParams = await searchParams;
+  
+  // Session bilgisini al
+  let currentUser = null;
+  try {
+    const { headers } = await import("next/headers");
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (session?.user) {
+      currentUser = {
+        id: session.user.id,
+        name: session.user.name,
+      };
+    }
+  } catch (error) {
+    console.log("Session alınamadı:", error);
+  }
   
   // Kategori filtresi varsa sadece o kategorinin postlarını getir, yoksa tüm postları getir
   const [postsResult, categoriesResult] = await Promise.all([
@@ -32,7 +51,7 @@ const BlogPage = async ({
             ? `${selectedCategoryName} Gönderileri`
             : "Gönderiler"}
         </h2>
-        <BlogList posts={posts} />
+        <BlogList posts={posts} currentUser={currentUser} />
       </div>
       <aside className="sticky top-8 shrink-0 lg:max-w-sm w-full">
         <Sidebar

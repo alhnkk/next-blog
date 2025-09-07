@@ -1,20 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 export default function Loading() {
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <Button variant="ghost" className="p-0" disabled>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Ana Sayfa
-          </Button>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-12">

@@ -1,7 +1,12 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Key } from "lucide-react";
+import { Key, Loader2 } from "lucide-react";
+import { getUsers } from "@/lib/actions/users";
+import { getRecentMessages, Message } from "@/lib/actions/messages";
 
 const lastMessages = [
   {
@@ -110,9 +115,182 @@ const MethodIcon = ({ method }: { method: string }) => {
   }
 };
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  createdAt: Date;
+}
+
 const CardList = ({ title }: { title: string }) => {
-  const list =
-    title === "Son Mesajlar" ? lastMessages : lastUsers;
+  const [users, setUsers] = useState<User[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (title === "Son Üyeler") {
+      const loadUsers = async () => {
+        try {
+          const result = await getUsers();
+          if (result.success && result.data) {
+            // Son 5 üyeyi al
+            setUsers(result.data.slice(0, 5));
+          }
+        } catch (error) {
+          console.error("Error loading users:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      loadUsers();
+    } else if (title === "Son Mesajlar") {
+      const loadMessages = async () => {
+        try {
+          const recentMessages = await getRecentMessages(5);
+          setMessages(recentMessages);
+        } catch (error) {
+          console.error("Error loading messages:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      loadMessages();
+    } else {
+      setIsLoading(false);
+    }
+  }, [title]);
+
+  const formatDate = (date: Date) => {
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 24) {
+      return `${diffInHours}s önce`;
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays}g önce`;
+    }
+  };
+
+  if (title === "Son Üyeler") {
+    if (isLoading) {
+      return (
+        <div className="">
+          <h1 className="text-lg font-medium mb-6">{title}</h1>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="">
+        <h1 className="text-lg font-medium mb-6">{title}</h1>
+        <div className="flex flex-col gap-2">
+          {users.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-sm">Henüz üye bulunmuyor</p>
+            </div>
+          ) : (
+            users.map((user) => (
+              <Card key={user.id} className="flex-row items-center justify-between gap-4 p-4">
+                <div className="w-12 h-12 rounded-full relative overflow-hidden bg-gray-200">
+                  {user.image ? (
+                    <Image
+                      src={user.image}
+                      alt={user.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-600 font-medium">
+                      {user.name?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                  )}
+                </div>
+                <CardContent className="flex-1 p-0">
+                  <CardTitle className="text-sm font-medium">{user.name}</CardTitle>
+                  <Badge variant="secondary" className="text-xs">
+                    {formatDate(user.createdAt)}
+                  </Badge>
+                </CardContent>
+                <CardFooter className="p-0">
+                  <div className="text-xs text-gray-500 max-w-[100px] truncate">
+                    {user.email}
+                  </div>
+                </CardFooter>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Son Mesajlar için gerçek veri
+  if (title === "Son Mesajlar") {
+    if (isLoading) {
+      return (
+        <div className="">
+          <h1 className="text-lg font-medium mb-6">{title}</h1>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="">
+        <h1 className="text-lg font-medium mb-6">{title}</h1>
+        <div className="flex flex-col gap-2">
+          {messages.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-sm">Henüz mesaj bulunmuyor</p>
+            </div>
+          ) : (
+            messages.map((message) => (
+              <Card key={message.id} className={`flex-row items-center justify-between gap-4 p-4 ${!message.read ? 'border-blue-200 bg-blue-50/50' : ''}`}>
+                <div className="w-12 h-12 rounded-full relative overflow-hidden bg-gray-200 flex items-center justify-center">
+                  <div className="w-full h-full flex items-center justify-center text-gray-600 font-medium">
+                    {message.name?.charAt(0).toUpperCase() || "M"}
+                  </div>
+                </div>
+                <CardContent className="flex-1 p-0">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    {message.name}
+                    {!message.read && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                        Yeni
+                      </Badge>
+                    )}
+                    {message.replied && (
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                        Yanıtlandı
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  <div className="text-xs text-gray-500 truncate max-w-[200px]">
+                    {message.subject || message.content.substring(0, 50) + "..."}
+                  </div>
+                </CardContent>
+                <CardFooter className="p-0">
+                  <div className="text-xs text-gray-500">
+                    {formatDate(message.createdAt)}
+                  </div>
+                </CardFooter>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Diğer durumlar için eski statik veri
+  const list = lastMessages;
   return (
     <div className="">
       <h1 className="text-lg font-medium mb-6">{title}</h1>
@@ -132,7 +310,7 @@ const CardList = ({ title }: { title: string }) => {
               <Badge variant="secondary">{item.badge}</Badge>
             </CardContent>
             <CardFooter className="p-0">
-              {"method" in item && <MethodIcon method={item.method} />}
+              <div className="text-sm text-gray-600">{item.count}</div>
             </CardFooter>
           </Card>
         ))}

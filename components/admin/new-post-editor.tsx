@@ -8,18 +8,19 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ImageUpload } from "@/components/ui/image-upload"
+import { useToast } from "@/hooks/use-toast"
+import RichTextEditor from "@/components/admin/text-editor"
+import { createPost } from "@/lib/actions/posts"
+import { getCategories } from "@/lib/actions/categories"
+import { useSession } from "@/lib/auth-client"
+import { PostStatus } from "@/lib/generated/prisma"
+import { toast } from "sonner"
 import {
   Save,
   Send,
   Calendar,
   User,
-  ImageIcon,
-  Link,
-  Bold,
-  Italic,
-  List,
-  AlignLeft,
-  MoreHorizontal,
   Plus,
   X,
 } from "lucide-react"
@@ -28,24 +29,93 @@ interface Category {
   id: number
   name: string
   slug: string
-  description?: string
-  color?: string
-  icon?: string
+  description?: string | null
+  color?: string | null
+  icon?: string | null
+  _count: {
+    posts: number
+  }
 }
 
 export function NewPostEditor() {
   const router = useRouter()
-  const { toast } = useToast()
+  const { data: session, isPending } = useSession()
   
   // Form state
   const [title, setTitle] = useState("")
   const [slug, setSlug] = useState("")
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false)
   const [content, setContent] = useState("")
   const [excerpt, setExcerpt] = useState("")
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState("")
-  const [category, setCategory] = useState("")
-  const [status, setStatus] = useState("draft")
+  const [categoryId, setCategoryId] = useState("")
+  const [status, setStatus] = useState<PostStatus>(PostStatus.DRAFT)
+  const [featured, setFeatured] = useState(false)
+  const [featuredImageUrl, setFeaturedImageUrl] = useState("")
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Auth kontrolü
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.push("/login")
+    }
+  }, [session, isPending, router])
+
+  // Load categories on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const result = await getCategories()
+        if (result.success) {
+          setCategories(result.data)
+        } else {
+          toast.error("Kategoriler yüklenirken hata oluştu")
+        }
+      } catch (error) {
+        toast.error("Kategoriler yüklenirken hata oluştu")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCategories()
+  }, [])
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (title && !isSlugManuallyEdited) {
+      const generatedSlug = generateSlug(title)
+      setSlug(generatedSlug)
+    }
+  }, [title, isSlugManuallyEdited])
+
+  const generateSlug = (text: string): string => {
+    return text
+      .toLowerCase()
+      .trim()
+      // Turkish characters to English
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ı/g, 'i')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/Ğ/g, 'g')
+      .replace(/Ü/g, 'u')
+      .replace(/Ş/g, 's')
+      .replace(/İ/g, 'i')
+      .replace(/Ö/g, 'o')
+      .replace(/Ç/g, 'c')
+      // Remove special characters and replace spaces with hyphens
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+  }
 
   const addTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -56,6 +126,79 @@ export function NewPostEditor() {
 
   const removeTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove))
+  }
+
+  const handleImageSelect = (file: File | null, url?: string) => {
+    if (url) {
+      setFeaturedImageUrl(url)
+    } else if (file) {
+      // Handle file upload - you'd typically upload to a server here
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const result = e.target?.result as string
+        setFeaturedImageUrl(result)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setFeaturedImageUrl("")
+    }
+  }
+
+  const handleSave = async (publishStatus: PostStatus = PostStatus.DRAFT) => {
+    if (!session?.user?.id) {
+      toast.error("Oturum açmanız gerekiyor")
+      return
+    }
+
+    if (!title.trim()) {
+      toast.error("Başlık gereklidir")
+      return
+    }
+
+    if (!slug.trim()) {
+      toast.error("Slug gereklidir")
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const result = await createPost({
+        title: title.trim(),
+        content: content || "",
+        slug: slug.trim(),
+        excerpt: excerpt.trim() || undefined,
+        featured,
+        status: publishStatus,
+        tags,
+        authorId: session.user.id,
+        categoryId: categoryId ? parseInt(categoryId) : undefined,
+      })
+
+      if (result.success) {
+        toast.success(result.message)
+        router.push("/admin/posts")
+      } else {
+        toast.error(result.error)
+      }
+    } catch (error) {
+      toast.error("Beklenmeyen bir hata oluştu")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handlePublish = () => handleSave(PostStatus.PUBLISHED)
+
+  // Loading state
+  if (isPending || !session) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-5rem)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Yükleniyor...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -78,6 +221,8 @@ export function NewPostEditor() {
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => handleSave(PostStatus.DRAFT)}
+                    disabled={isSaving}
                     className="text-gray-600 border-gray-300 bg-transparent dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-800"
                   >
                     <Save className="h-4 w-4 mr-1" />
@@ -116,6 +261,11 @@ export function NewPostEditor() {
                   <span>https://yourblog.com/post/</span>
                   <Input
                     placeholder="yazi-linki"
+                    value={slug}
+                    onChange={(e) => {
+                      setSlug(e.target.value)
+                      setIsSlugManuallyEdited(true)
+                    }}
                     className="text-2xl font-bold border-b border-x-0 border-t-0  bg-accent border rounded-none px-2 py-0 focus-visible:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:bg-background dark:text-gray-100"
                     />
                 </div>
@@ -142,39 +292,12 @@ export function NewPostEditor() {
               </div>
 
               {/* Content */}
-              <div className="">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">İçerik</Label>
-
-                {/* Rich Text Toolbar */}
-                <div className="flex items-center gap-1 p-2 border border-gray-200 dark:border-gray-700 bg-sidebar">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <Bold className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <Italic className="h-4 w-4" />
-                  </Button>
-                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <AlignLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <Link className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <ImageIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <Textarea
-                  placeholder="Yazmaya başlayın"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={20}
-                  className="resize-none h-64 text-sm leading-relaxed border-gray-200 dark:border-gray-700 border-t-0 rounded-none focus-visible:ring-1 focus-visible:ring-accent/30  dark:text-gray-100"
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">İçerik</Label>
+                <RichTextEditor
+                  initialContent={content}
+                  onChange={setContent}
+                  placeholder="Yazmaya başlayın... Markdown shortcuts kullanabilirsiniz"
                 />
               </div>
             </div>
@@ -212,11 +335,21 @@ export function NewPostEditor() {
                         <SelectValue placeholder="Kategori Seç" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.name}
+                        {isLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Yükleniyor...
                           </SelectItem>
-                        ))}
+                        ) : categories.length > 0 ? (
+                          categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-categories" disabled>
+                            Kategori bulunamadı
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -243,7 +376,7 @@ export function NewPostEditor() {
                     </div>
                     <div className="flex items-center gap-2">
                       <User className="h-3 w-3" />
-                      <span>{session?.user?.name || "Senin tarafından"}</span>
+                      <span>{session?.user?.name || "Bilinmeyen kullanıcı"}</span>
                     </div>
                   </div>
                 </div>

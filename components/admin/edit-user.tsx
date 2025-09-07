@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -27,50 +28,98 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useParams } from "next/navigation";
+import { updateUserProfile } from "@/lib/actions/users";
+import { toast } from "sonner";
+import { useState } from "react";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: Date | null;
+  image: string | null;
+  bio: string | null;
+  location: string | null;
+  phone: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string;
+  banned: boolean;
+  banReason: string | null;
+  banExpires: Date | null;
+  _count: {
+    posts: number;
+    comments: number;
+  };
+}
+
+interface EditUserProps {
+  user: User;
+  onUserUpdate?: (updatedUser: unknown) => void;
+}
 
 const formSchema = z.object({
-  username: z
+  name: z
     .string()
-    .min(2, { message: "Kullanıcı adı en az 2 karakter olmalı!" })
+    .min(2, { message: "İsim en az 2 karakter olmalı!" })
     .max(50),
   email: z.string().email({ message: "Geçersiz eposta adresi!" }),
-  phone: z.string().min(10).max(15),
-  location: z.string().min(2),
-  role: z.enum(["admin", "user"]),
+  phone: z.string().optional(),
+  location: z.string().optional(),
+  bio: z.string().optional(),
 });
 
-const EditUser = () => {
-    const params = useParams()
+const EditUser = ({ user, onUserUpdate }: EditUserProps) => {
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: params.username as string,
-      email: "john.doe@gmail.com",
-      phone: "+1 234 5678",
-      location: "New York, NY",
-      role: "admin",
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      location: user.location || "",
+      bio: user.bio || "",
     },
   });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+    try {
+      const result = await updateUserProfile(user.id, values);
+      
+      if (result.success) {
+        toast.success(result.message);
+        if (onUserUpdate) {
+          onUserUpdate(result.data);
+        }
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error("Beklenmeyen bir hata oluştu");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <SheetContent>
       <SheetHeader>
         <SheetTitle className="mb-4">Düzenle</SheetTitle>
         <SheetDescription asChild>
           <Form {...form}>
-            <form className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="username"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Kullanıcı adı</FormLabel>
+                    <FormLabel>İsim</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      Herkes tarafından görüntülenen özgün kullanıcı adı.
+                      Kullanıcının görünen adı.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -83,10 +132,10 @@ const EditUser = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} type="email" />
                     </FormControl>
                     <FormDescription>
-                      Eposta adresi
+                      Kullanıcının email adresi.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -102,7 +151,7 @@ const EditUser = () => {
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                     Telefon numarası yalnızca admin tarafından görüntülenebilir.
+                      Telefon numarası (opsiyonel).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -118,7 +167,7 @@ const EditUser = () => {
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      Konum
+                      Kullanıcının konumu (opsiyonel).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -126,29 +175,23 @@ const EditUser = () => {
               />
               <FormField
                 control={form.control}
-                name="role"
+                name="bio"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Rol</FormLabel>
+                    <FormLabel>Biyografi</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="user">User</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Textarea {...field} rows={3} />
                     </FormControl>
                     <FormDescription>
-                      Only verified users can be admin.
+                      Kullanıcının kısa biyografisi (opsiyonel).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit">Submit</Button>
+              <Button type="submit" disabled={isLoading} className="w-full">
+                {isLoading ? "Güncelleniyor..." : "Güncelle"}
+              </Button>
             </form>
           </Form>
         </SheetDescription>

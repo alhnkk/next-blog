@@ -1,11 +1,13 @@
+"use client";
+
 import {
   Book,
-  Search,
   Settings,
   Inbox,
   Folder,
   Users,
   PlusCircle,
+  MessageSquare,
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,8 +26,30 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import UserNav from "@/components/user-nav";
+import { useState, useEffect } from "react";
+import { getUnreadMessageCount } from "@/lib/actions/messages";
 
 const AppSidebar = () => {
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const loadUnreadCount = async () => {
+      try {
+        const count = await getUnreadMessageCount();
+        setUnreadCount(count);
+      } catch (error) {
+        console.error("Error loading unread message count:", error);
+      }
+    };
+
+    loadUnreadCount();
+    
+    // Her 30 saniyede bir güncelle
+    const interval = setInterval(loadUnreadCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-4">
@@ -53,7 +77,6 @@ const AppSidebar = () => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-            
               <SidebarMenuItem>
                 <SidebarMenuButton
                   size="lg"
@@ -76,7 +99,7 @@ const AppSidebar = () => {
           <SidebarGroupLabel>İÇERİK</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-            <SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link href="/admin/posts">
                     <Book />
@@ -88,7 +111,7 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/">
+                  <Link href="/admin/categories">
                     <Folder />
                     <span className="group-data-[collapsible=icon]:hidden">
                       Kategoriler
@@ -98,10 +121,10 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/">
-                    <Search />
+                  <Link href="/admin/comments">
+                    <MessageSquare />
                     <span className="group-data-[collapsible=icon]:hidden">
-                      Arama
+                      Yorumlar
                     </span>
                   </Link>
                 </SidebarMenuButton>
@@ -126,14 +149,18 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/">
+                  <Link href="/admin/messages">
                     <Inbox />
                     <span className="group-data-[collapsible=icon]:hidden">
                       Mesajlar
                     </span>
                   </Link>
                 </SidebarMenuButton>
-                <SidebarMenuBadge>10</SidebarMenuBadge>
+                {unreadCount > 0 && (
+                  <SidebarMenuBadge className="bg-red-500 text-white">
+                    {unreadCount}
+                  </SidebarMenuBadge>
+                )}
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
@@ -151,7 +178,7 @@ const AppSidebar = () => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem  className="mx-auto my-3">
+          <SidebarMenuItem className="mx-auto my-3">
             <UserNav />
           </SidebarMenuItem>
         </SidebarMenu>

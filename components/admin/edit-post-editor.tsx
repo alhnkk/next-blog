@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { updatePost } from "@/lib/actions/posts"
+import { getCategories } from "@/lib/actions/categories"
 import { PostStatus } from "@/lib/generated/prisma"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -21,6 +22,18 @@ import {
   Menu,
 } from "lucide-react"
 import { Textarea } from "../ui/textarea"
+
+interface Category {
+  id: number
+  name: string
+  slug: string
+  description?: string | null
+  color?: string | null
+  icon?: string | null
+  _count: {
+    posts: number
+  }
+}
 
 interface EditPostEditorProps {
   post: {
@@ -66,13 +79,68 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
   const [status, setStatus] = useState(post.status)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true)
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false)
+
+  // Load categories on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const result = await getCategories()
+        if (result.success) {
+          setCategories(result.data)
+        } else {
+          toast.error("Kategoriler yüklenirken hata oluştu")
+        }
+      } catch (error) {
+        toast.error("Kategoriler yüklenirken hata oluştu")
+      } finally {
+        setIsCategoriesLoading(false)
+      }
+    }
+
+    loadCategories()
+  }, [])
 
 
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (title && !isSlugManuallyEdited) {
+      const generatedSlug = generateSlug(title)
+      setSlug(generatedSlug)
+    }
+  }, [title, isSlugManuallyEdited])
+
+  const generateSlug = (text: string): string => {
+    return text
+      .toLowerCase()
+      .trim()
+      // Turkish characters to English
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ı/g, 'i')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/Ğ/g, 'g')
+      .replace(/Ü/g, 'u')
+      .replace(/Ş/g, 's')
+      .replace(/İ/g, 'i')
+      .replace(/Ö/g, 'o')
+      .replace(/Ç/g, 'c')
+      // Remove special characters and replace spaces with hyphens
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+  }
 
   // Title değiştiğinde slug'ı otomatik güncelle (opsiyonel)
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    // Edit modunda slug'ı otomatik değiştirmiyoruz, kullanıcı isterse manuel değiştirebilir
+    // Edit modunda da slug otomasyonu çalışsın, ama kullanıcı manuel değiştirmişse durduralım
   };
 
   const addTag = () => {
@@ -239,7 +307,10 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
                   <Input
                     placeholder="yazi-linki"
                     value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
+                    onChange={(e) => {
+                      setSlug(e.target.value)
+                      setIsSlugManuallyEdited(true)
+                    }}
                     className="text-lg lg:text-xl font-bold border-b border-x-0 border-t-0 bg-accent border rounded-none px-2 py-2 focus-visible:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:bg-background dark:text-gray-100"
                   />
                 </div>
@@ -322,10 +393,21 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
                         <SelectValue placeholder="Kategori Seç" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">Edebiyat</SelectItem>
-                        <SelectItem value="2">Teknoloji</SelectItem>
-                        <SelectItem value="3">Tasarım</SelectItem>
-                        <SelectItem value="4">İş Dünyası</SelectItem>
+                        {isCategoriesLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Yükleniyor...
+                          </SelectItem>
+                        ) : categories.length > 0 ? (
+                          categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {cat.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-categories" disabled>
+                            Kategori bulunamadı
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -352,7 +434,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
                       placeholder="Etiket ekle..."
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && addTag()}}
+                      onKeyDown={(e) => e.key === "Enter" && addTag()}
                       className="flex-1 text-sm"
                     />
                     <Button
