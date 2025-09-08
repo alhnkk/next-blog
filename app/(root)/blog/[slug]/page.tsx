@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { CommentsSection } from "@/components/comments-section";
 import Link from "next/link";
-import Image from "next/image";
+import { Image, ImageKitProvider } from "@imagekit/next";
 import { notFound } from "next/navigation";
 import { ShareButton } from "@/components/share-button";
 
@@ -26,6 +26,7 @@ interface Post {
   content: string;
   excerpt?: string;
   featured?: boolean;
+  featuredImageUrl?: string;
   createdAt: string;
   tags?: string[];
   author: {
@@ -65,7 +66,8 @@ interface Post {
 }
 
 const BlogPostPage = async ({ params }: BlogPostPageProps) => {
-  const postResult = await getPostBySlug(params.slug);
+  const { slug } = await params;
+  const postResult = await getPostBySlug(slug);
   
   if (!postResult.success || !postResult.data) {
     notFound();
@@ -94,38 +96,41 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
       };
     }
   } catch (error) {
-    console.log("Session alınamadı:", error);
+    // Session alınamadı
   }
 
+  const imagekitUrlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
+
   return (
-    <div className="min-h-screen">
+    <ImageKitProvider urlEndpoint={imagekitUrlEndpoint || ''}>
+      <div className="min-h-screen">
 
-      {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 py-12">
-        {/* Article Header */}
-        <header className="mb-12">
-          <h1 className="text-4xl md:text-4xl font-bold leading-tight mb-6">
-            {post.title}
-          </h1>
+        {/* Main Content */}
+        <main className="max-w-2xl mx-auto px-4 py-12">
+          {/* Article Header */}
+          <header className="mb-12">
+            <h1 className="text-4xl md:text-4xl font-bold leading-tight mb-6">
+              {post.title}
+            </h1>
 
-          {/* Featured Image */}
-          <div className="relative w-full h-80 mb-8 rounded-[1px] overflow-hidden">
-            <Image
-              src="/placeholder.jpeg"
-              alt={post.title}
-              width={800}
-              height={320}
-              className="w-full h-full object-cover"
-              priority
-            />
-            {post.featured && (
-              <div className="absolute top-4 left-4">
-                <span className="bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium">
-                  Öne Çıkan
-                </span>
-              </div>
-            )}
-          </div>
+            {/* Featured Image */}
+            <div className="relative w-full h-80 mb-8 rounded-[1px] overflow-hidden">
+              <Image
+                src={post.featuredImageUrl || "/placeholder.jpeg"}
+                alt={post.title}
+                width={800}
+                height={320}
+                className="w-full h-full object-cover"
+                priority
+              />
+              {post.featured && (
+                <div className="absolute top-4 left-4">
+                  <span className="bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium">
+                    Öne Çıkan
+                  </span>
+                </div>
+              )}
+            </div>
 
           {post.excerpt && (
             <p className="leading-relaxed mb-8 line-clamp-3">{post.excerpt}</p>
@@ -257,6 +262,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
         />
       </main>
     </div>
+    </ImageKitProvider>
   );
 };
 

@@ -11,6 +11,7 @@ export interface CreatePostData {
   slug: string;
   excerpt?: string;
   featured?: boolean;
+  featuredImageUrl?: string;
   status?: PostStatus;
   tags?: string[];
   authorId: string;
@@ -23,6 +24,7 @@ export interface UpdatePostData {
   slug?: string;
   excerpt?: string;
   featured?: boolean;
+  featuredImageUrl?: string;
   status?: PostStatus;
   tags?: string[];
   categoryId?: number;
@@ -39,6 +41,7 @@ export async function getPosts() {
         slug: true,
         excerpt: true,
         featured: true,
+        featuredImageUrl: true,
         status: true,
         tags: true,
         authorId: true,
@@ -100,6 +103,7 @@ export async function getPublishedPosts() {
         slug: true,
         excerpt: true,
         featured: true,
+        featuredImageUrl: true,
         status: true,
         tags: true,
         createdAt: true,
@@ -213,6 +217,7 @@ export async function getPostById(postId: number) {
         slug: true,
         excerpt: true,
         featured: true,
+        featuredImageUrl: true,
         status: true,
         tags: true,
         authorId: true,
@@ -321,6 +326,7 @@ export async function getPostBySlug(slug: string) {
         slug: true,
         excerpt: true,
         featured: true,
+        featuredImageUrl: true,
         status: true,
         tags: true,
         authorId: true,
@@ -469,6 +475,7 @@ export async function createPost(data: CreatePostData) {
         slug: data.slug,
         excerpt: data.excerpt,
         featured: data.featured || false,
+        featuredImageUrl: data.featuredImageUrl,
         status: data.status || PostStatus.DRAFT,
         tags: data.tags || [],
         authorId: data.authorId,
@@ -581,6 +588,7 @@ export async function updatePost(postId: number, data: UpdatePostData) {
         ...(data.slug && { slug: data.slug }),
         ...(data.excerpt !== undefined && { excerpt: data.excerpt }),
         ...(data.featured !== undefined && { featured: data.featured }),
+        ...(data.featuredImageUrl !== undefined && { featuredImageUrl: data.featuredImageUrl }),
         ...(data.status && { status: data.status }),
         ...(data.tags !== undefined && { tags: data.tags }),
         ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
@@ -1009,6 +1017,7 @@ export async function getPostsByCategorySlug(
         slug: true,
         excerpt: true,
         featured: true,
+        featuredImageUrl: true,
         status: true,
         tags: true,
         createdAt: true,

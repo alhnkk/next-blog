@@ -168,6 +168,7 @@ export function NewPostEditor() {
         slug: slug.trim(),
         excerpt: excerpt.trim() || undefined,
         featured,
+        featuredImageUrl: featuredImageUrl || undefined,
         status: publishStatus,
         tags,
         authorId: session.user.id,
@@ -283,8 +284,8 @@ export function NewPostEditor() {
                 />
               </div>
 
-              {/* Featured Image - Mobile Only */}
-              <div className="lg:hidden">
+              {/* Featured Image */}
+              <div>
                 <ImageUpload
                   onImageSelect={handleImageSelect}
                   currentImage={featuredImageUrl}

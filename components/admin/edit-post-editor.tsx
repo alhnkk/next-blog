@@ -22,6 +22,7 @@ import {
   Menu,
 } from "lucide-react"
 import { Textarea } from "../ui/textarea"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 interface Category {
   id: number
@@ -43,6 +44,7 @@ interface EditPostEditorProps {
     slug: string;
     excerpt: string | null;
     featured: boolean;
+    featuredImageUrl: string | null;
     status: PostStatus;
     tags: string[];
     authorId: string;
@@ -77,6 +79,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
   const [newTag, setNewTag] = useState("")
   const [category, setCategory] = useState(post.categoryId?.toString() || "")
   const [status, setStatus] = useState(post.status)
+  const [featuredImageUrl, setFeaturedImageUrl] = useState(post.featuredImageUrl || "")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
@@ -154,6 +157,22 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
     setTags(tags.filter((tag) => tag !== tagToRemove))
   }
 
+  const handleImageSelect = (file: File | null, url?: string) => {
+    if (url) {
+      setFeaturedImageUrl(url)
+    } else if (file) {
+      // Handle file upload - you'd typically upload to a server here
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const result = e.target?.result as string
+        setFeaturedImageUrl(result)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setFeaturedImageUrl("")
+    }
+  }
+
 
 
   const handleSave = async () => {
@@ -164,6 +183,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
         content,
         slug,
         excerpt,
+        featuredImageUrl: featuredImageUrl || undefined,
         tags,
         categoryId: category ? parseInt(category) : undefined,
         status,
@@ -190,6 +210,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
         content,
         slug,
         excerpt,
+        featuredImageUrl: featuredImageUrl || undefined,
         tags,
         categoryId: category ? parseInt(category) : undefined,
         status: PostStatus.PUBLISHED,
@@ -340,6 +361,14 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
                   onChange={(e) => setExcerpt(e.target.value)}
                   rows={3}
                   className="resize-none text-base lg:text-lg font-medium border-b border-x-0 border-t-0 bg-accent border rounded-none px-3 py-2 h-20 lg:h-24 focus-visible:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:bg-background dark:text-gray-100"
+                />
+              </div>
+
+              {/* Featured Image */}
+              <div>
+                <ImageUpload
+                  onImageSelect={handleImageSelect}
+                  currentImage={featuredImageUrl}
                 />
               </div>
 

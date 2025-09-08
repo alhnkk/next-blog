@@ -21,7 +21,7 @@ model Post {
   slug         String    @unique
   excerpt      String?
   featured     Boolean   @default(false)
-  featuredImage String?
+  featuredImageUrl String?
   status       PostStatus @default(DRAFT)
   tags         String[]
   authorId     String
