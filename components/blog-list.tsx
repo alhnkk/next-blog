@@ -13,6 +13,7 @@ interface Post {
   slug: string;
   excerpt: string | null;
   featured: boolean;
+  featuredImageUrl?: string | null;
   status: string;
   tags: string[];
   createdAt: Date;
@@ -65,7 +66,7 @@ const BlogList = ({ posts, currentUser }: BlogListProps) => {
             className="w-[400px] h-[256px] bg-muted rounded-[1px] flex items-center justify-center"
           >
             <Image
-              src="/placeholder2.jpeg"
+              src={post.featuredImageUrl || "/placeholder2.jpeg"}
               alt={post.title}
               width={400}
               height={302}

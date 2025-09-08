@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prismadb";
+import { prismadb } from "@/lib/prismadb";
 import { revalidatePath } from "next/cache";
 
 export interface SettingsData {
@@ -30,11 +30,11 @@ export interface Settings {
 
 export async function getSettings() {
   try {
-    let settings = await prisma.settings.findFirst();
+    let settings = await prismadb.settings.findFirst();
     
     if (!settings) {
       // İlk kez çalıştırılıyorsa varsayılan ayarları oluştur
-      settings = await prisma.settings.create({
+      settings = await prismadb.settings.create({
         data: {
           siteName: "Next Blog",
           siteDescription: "Modern blog platformu",
@@ -56,11 +56,11 @@ export async function getSettings() {
 
 export async function updateSettings(data: SettingsData) {
   try {
-    let settings = await prisma.settings.findFirst();
+    let settings = await prismadb.settings.findFirst();
     
     if (!settings) {
       // Ayarlar yoksa oluştur
-      settings = await prisma.settings.create({
+      settings = await prismadb.settings.create({
         data: {
           siteName: data.siteName,
           siteDescription: data.siteDescription || null,
@@ -74,7 +74,7 @@ export async function updateSettings(data: SettingsData) {
       });
     } else {
       // Mevcut ayarları güncelle
-      settings = await prisma.settings.update({
+      settings = await prismadb.settings.update({
         where: { id: settings.id },
         data: {
           siteName: data.siteName,
@@ -110,14 +110,14 @@ export async function resetSettings() {
       textColor: "#1f2937",
     };
 
-    let settings = await prisma.settings.findFirst();
+    let settings = await prismadb.settings.findFirst();
     
     if (!settings) {
-      settings = await prisma.settings.create({
+      settings = await prismadb.settings.create({
         data: defaultSettings,
       });
     } else {
-      settings = await prisma.settings.update({
+      settings = await prismadb.settings.update({
         where: { id: settings.id },
         data: defaultSettings,
       });

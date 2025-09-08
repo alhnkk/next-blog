@@ -1,13 +1,19 @@
 "use client";
 
 import { useSession } from "@/lib/auth-client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getUserById } from "@/lib/actions/users";
 import UserProfile from "@/components/user-profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, User } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useSearchParams } from "next/navigation";
+import { getLikedPostsByUser } from "@/lib/actions/likes";
+import { getCommentsByUser } from "@/lib/actions/comments";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface UserData {
   id: string;
@@ -28,19 +34,27 @@ interface UserData {
 
 const ProfilePage = () => {
   const { data: session, isPending } = useSession();
+  const searchParams = useSearchParams();
+  const userIdFromQuery = searchParams.get("userId");
+  const isOwnProfile = useMemo(() => {
+    return userIdFromQuery ? userIdFromQuery === session?.user?.id : true;
+  }, [userIdFromQuery, session?.user?.id]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [likedPosts, setLikedPosts] = useState<any[]>([]);
+  const [userComments, setUserComments] = useState<any[]>([]);
 
   const fetchUserData = async () => {
-    if (!session?.user?.id) {
+    const targetUserId = userIdFromQuery || session?.user?.id;
+    if (!targetUserId) {
       setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
-      const result = await getUserById(session.user.id);
+      const result = await getUserById(targetUserId);
       
       if (result.success && result.data) {
         setUserData(result.data);
@@ -60,7 +74,22 @@ const ProfilePage = () => {
     if (!isPending) {
       fetchUserData();
     }
-  }, [session?.user?.id, isPending]);
+  }, [session?.user?.id, userIdFromQuery, isPending]);
+
+  // Beğeniler ve yorumlar
+  useEffect(() => {
+    const loadExtras = async () => {
+      const targetUserId = userIdFromQuery || session?.user?.id;
+      if (!targetUserId) return;
+      const [likesRes, commentsRes] = await Promise.all([
+        getLikedPostsByUser(targetUserId),
+        getCommentsByUser(targetUserId, 1, 10),
+      ]);
+      if (likesRes.success) setLikedPosts(likesRes.data || []);
+      if (commentsRes.success) setUserComments(commentsRes.data?.comments || []);
+    };
+    if (!isPending) loadExtras();
+  }, [isPending, userIdFromQuery, session?.user?.id]);
 
   if (isPending || loading) {
     return (
@@ -223,10 +252,60 @@ const ProfilePage = () => {
       </div>
 
       {/* Profile Content */}
-      <UserProfile 
-        user={userData} 
-        onUpdate={fetchUserData}
-      />
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <UserProfile 
+              user={userData} 
+              onUpdate={fetchUserData}
+            />
+          </div>
+          <div className="md:col-span-1 space-y-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="font-semibold">Beğenilen Gönderiler</div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {likedPosts.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">Henüz beğeni yok.</div>
+                ) : (
+                  likedPosts.slice(0, 5).map((post: any) => (
+                    <div key={post.id} className="text-sm">
+                      <Link href={`/blog/${post.slug}`} className="hover:underline font-medium">
+                        {post.title}
+                      </Link>
+                      <div className="text-muted-foreground text-xs">{new Date(post.createdAt).toLocaleDateString("tr-TR")}</div>
+                    </div>
+                  ))
+                )}
+                {likedPosts.length > 5 && (
+                  <Link href={`/blog`} className="text-xs text-primary hover:underline">Tümünü gör</Link>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="font-semibold">Yorumlar</div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {userComments.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">Henüz yorum yok.</div>
+                ) : (
+                  userComments.slice(0, 5).map((c: any) => (
+                    <div key={c.id} className="text-sm">
+                      <Link href={`/blog/${c.post.slug}`} className="hover:underline">
+                        {c.post.title}
+                      </Link>
+                      <div className="text-muted-foreground text-xs line-clamp-1">{c.content}</div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

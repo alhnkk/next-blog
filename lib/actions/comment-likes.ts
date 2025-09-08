@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prismadb";
+import { prismadb } from "@/lib/prismadb";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 
@@ -20,7 +20,7 @@ export async function toggleCommentLike(commentId: number) {
     }
 
     // Comment var mı kontrol et
-    const comment = await prisma.comment.findUnique({
+    const comment = await prismadb.comment.findUnique({
       where: { id: commentId },
       select: { id: true, postId: true, post: { select: { slug: true } } },
     });
@@ -33,7 +33,7 @@ export async function toggleCommentLike(commentId: number) {
     }
 
     // Mevcut beğeni var mı kontrol et
-    const existingLike = await prisma.commentLike.findUnique({
+    const existingLike = await prismadb.commentLike.findUnique({
       where: {
         userId_commentId: {
           userId: session.user.id,
@@ -44,14 +44,14 @@ export async function toggleCommentLike(commentId: number) {
 
     if (existingLike) {
       // Beğeniyi kaldır
-      await prisma.commentLike.delete({
+      await prismadb.commentLike.delete({
         where: {
           id: existingLike.id,
         },
       });
 
       // Güncel beğeni sayısını al
-      const likeCount = await prisma.commentLike.count({
+      const likeCount = await prismadb.commentLike.count({
         where: { commentId: commentId },
       });
 
@@ -68,7 +68,7 @@ export async function toggleCommentLike(commentId: number) {
       };
     } else {
       // Beğeni ekle
-      await prisma.commentLike.create({
+      await prismadb.commentLike.create({
         data: {
           userId: session.user.id,
           commentId: commentId,
@@ -76,7 +76,7 @@ export async function toggleCommentLike(commentId: number) {
       });
 
       // Güncel beğeni sayısını al
-      const likeCount = await prisma.commentLike.count({
+      const likeCount = await prismadb.commentLike.count({
         where: { commentId: commentId },
       });
 

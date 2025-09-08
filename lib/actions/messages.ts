@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prismadb";
+import { prismadb } from "@/lib/prismadb";
 import { revalidatePath } from "next/cache";
 
 export interface CreateMessageData {
@@ -24,7 +24,7 @@ export interface Message {
 
 export async function createMessage(data: CreateMessageData) {
   try {
-    const message = await prisma.message.create({
+    const message = await prismadb.message.create({
       data: {
         name: data.name,
         email: data.email,
@@ -46,12 +46,12 @@ export async function getMessages(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;
     
     const [messages, total] = await Promise.all([
-      prisma.message.findMany({
+      prismadb.message.findMany({
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
       }),
-      prisma.message.count(),
+      prismadb.message.count(),
     ]);
 
     return {
@@ -68,7 +68,7 @@ export async function getMessages(page: number = 1, limit: number = 10) {
 
 export async function getMessageById(id: number) {
   try {
-    const message = await prisma.message.findUnique({
+    const message = await prismadb.message.findUnique({
       where: { id },
     });
 
@@ -85,7 +85,7 @@ export async function getMessageById(id: number) {
 
 export async function markMessageAsRead(id: number) {
   try {
-    await prisma.message.update({
+    await prismadb.message.update({
       where: { id },
       data: { read: true },
     });
@@ -100,7 +100,7 @@ export async function markMessageAsRead(id: number) {
 
 export async function markMessageAsReplied(id: number) {
   try {
-    await prisma.message.update({
+    await prismadb.message.update({
       where: { id },
       data: { replied: true },
     });
@@ -115,7 +115,7 @@ export async function markMessageAsReplied(id: number) {
 
 export async function deleteMessage(id: number) {
   try {
-    await prisma.message.delete({
+    await prismadb.message.delete({
       where: { id },
     });
 
@@ -129,7 +129,7 @@ export async function deleteMessage(id: number) {
 
 export async function getRecentMessages(limit: number = 5) {
   try {
-    const messages = await prisma.message.findMany({
+    const messages = await prismadb.message.findMany({
       take: limit,
       orderBy: { createdAt: "desc" },
     });
@@ -143,7 +143,7 @@ export async function getRecentMessages(limit: number = 5) {
 
 export async function getUnreadMessageCount() {
   try {
-    const count = await prisma.message.count({
+    const count = await prismadb.message.count({
       where: { read: false },
     });
 

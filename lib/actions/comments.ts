@@ -4,6 +4,59 @@ import { prismadb } from "../prismadb";
 import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 
+// GET COMMENTS BY USER ID (public/profile usage)
+export async function getCommentsByUser(userId: string, page = 1, limit = 20) {
+  try {
+    const skip = (page - 1) * limit;
+
+    const [comments, total] = await Promise.all([
+      prismadb.comment.findMany({
+        where: {
+          authorId: userId,
+          approved: true,
+        },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          post: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prismadb.comment.count({
+        where: { authorId: userId, approved: true },
+      }),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        comments,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching user comments:", error);
+    return {
+      success: false,
+      error: "Kullanıcı yorumları alınırken hata oluştu",
+    };
+  }
+}
+
 // GET COMMENTS BY POST ID
 export async function getCommentsByPostId(postId: number) {
   try {
