@@ -36,6 +36,7 @@ import {
   Type,
   Minus,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface RichTextEditorProps {
   initialContent?: string;
@@ -54,6 +55,7 @@ export default function RichTextEditor({
 }: RichTextEditorProps) {
   const [linkUrl, setLinkUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageAltText, setImageAltText] = useState("");
   const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -127,11 +129,19 @@ export default function RichTextEditor({
 
   const addImage = useCallback(() => {
     if (imageUrl && editor) {
-      editor.chain().focus().setImage({ src: imageUrl }).run();
+      if (!imageAltText.trim()) {
+        toast.error("Alt text alanı zorunludur")
+        return
+      }
+      editor.chain().focus().setImage({ 
+        src: imageUrl,
+        alt: imageAltText 
+      }).run();
       setImageUrl("");
+      setImageAltText("");
       setIsImagePopoverOpen(false);
     }
-  }, [editor, imageUrl]);
+  }, [editor, imageUrl, imageAltText]);
 
   const addHorizontalRule = useCallback(() => {
     if (editor) {
@@ -388,7 +398,30 @@ export default function RichTextEditor({
                     }}
                   />
                 </div>
-                <Button onClick={addImage} size="sm" className="w-full">
+                <div>
+                  <Label htmlFor="image-alt-text">Alt Text <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="image-alt-text"
+                    placeholder="Görseli açıklayın..."
+                    value={imageAltText}
+                    onChange={(e) => setImageAltText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addImage();
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Görsel açıklaması SEO ve erişilebilirlik için önemlidir.
+                  </p>
+                </div>
+                <Button 
+                  onClick={addImage} 
+                  size="sm" 
+                  className="w-full"
+                  disabled={!imageUrl.trim() || !imageAltText.trim()}
+                >
                   Resim Ekle
                 </Button>
               </div>

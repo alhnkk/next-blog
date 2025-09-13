@@ -32,11 +32,11 @@
 - [x] İlgili postlar önerisi
 
 ### 5. Resim Optimizasyonu
-- [ ] Alt text zorunlu hale getir
-- [ ] Lazy loading implementasyonu
-- [ ] WebP format desteği
-- [ ] Responsive images
-- [ ] Image sitemap
+- [x] Alt text zorunlu hale getir
+- [x] Lazy loading implementasyonu
+- [x] WebP format desteği (ImageKit otomatik optimizasyon)
+- [x] Responsive images
+- [x] Image sitemap
 
 ### 6. Performans Optimizasyonu
 - [ ] Core Web Vitals optimizasyonu

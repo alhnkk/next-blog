@@ -12,6 +12,7 @@ export interface CreatePostData {
   excerpt?: string;
   featured?: boolean;
   featuredImageUrl?: string;
+  featuredImageAlt?: string;
   status?: PostStatus;
   tags?: string[];
   authorId: string;
@@ -25,6 +26,7 @@ export interface UpdatePostData {
   excerpt?: string;
   featured?: boolean;
   featuredImageUrl?: string;
+  featuredImageAlt?: string;
   status?: PostStatus;
   tags?: string[];
   categoryId?: number;
@@ -476,6 +478,7 @@ export async function createPost(data: CreatePostData) {
         excerpt: data.excerpt,
         featured: data.featured || false,
         featuredImageUrl: data.featuredImageUrl,
+        featuredImageAlt: data.featuredImageAlt,
         status: data.status || PostStatus.DRAFT,
         tags: data.tags || [],
         authorId: data.authorId,
@@ -589,6 +592,7 @@ export async function updatePost(postId: number, data: UpdatePostData) {
         ...(data.excerpt !== undefined && { excerpt: data.excerpt }),
         ...(data.featured !== undefined && { featured: data.featured }),
         ...(data.featuredImageUrl !== undefined && { featuredImageUrl: data.featuredImageUrl }),
+        ...(data.featuredImageAlt !== undefined && { featuredImageAlt: data.featuredImageAlt }),
         ...(data.status && { status: data.status }),
         ...(data.tags !== undefined && { tags: data.tags }),
         ...(data.categoryId !== undefined && { categoryId: data.categoryId }),

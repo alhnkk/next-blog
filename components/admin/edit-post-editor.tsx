@@ -45,6 +45,7 @@ interface EditPostEditorProps {
     excerpt: string | null;
     featured: boolean;
     featuredImageUrl: string | null;
+    featuredImageAlt: string | null;
     status: PostStatus;
     tags: string[];
     authorId: string;
@@ -80,6 +81,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
   const [category, setCategory] = useState(post.categoryId?.toString() || "")
   const [status, setStatus] = useState(post.status)
   const [featuredImageUrl, setFeaturedImageUrl] = useState(post.featuredImageUrl || "")
+  const [featuredImageAlt, setFeaturedImageAlt] = useState(post.featuredImageAlt || "")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
@@ -157,19 +159,22 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
     setTags(tags.filter((tag) => tag !== tagToRemove))
   }
 
-  const handleImageSelect = (file: File | null, url?: string) => {
+  const handleImageSelect = (file: File | null, url?: string, altText?: string) => {
     if (url) {
       setFeaturedImageUrl(url)
+      setFeaturedImageAlt(altText || "")
     } else if (file) {
       // Handle file upload - you'd typically upload to a server here
       const reader = new FileReader()
       reader.onload = (e) => {
         const result = e.target?.result as string
         setFeaturedImageUrl(result)
+        setFeaturedImageAlt(altText || "")
       }
       reader.readAsDataURL(file)
     } else {
       setFeaturedImageUrl("")
+      setFeaturedImageAlt("")
     }
   }
 
@@ -184,6 +189,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
         slug,
         excerpt,
         featuredImageUrl: featuredImageUrl || undefined,
+        featuredImageAlt: featuredImageAlt || undefined,
         tags,
         categoryId: category ? parseInt(category) : undefined,
         status,
@@ -211,6 +217,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
         slug,
         excerpt,
         featuredImageUrl: featuredImageUrl || undefined,
+        featuredImageAlt: featuredImageAlt || undefined,
         tags,
         categoryId: category ? parseInt(category) : undefined,
         status: PostStatus.PUBLISHED,
@@ -369,6 +376,8 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
                 <ImageUpload
                   onImageSelect={handleImageSelect}
                   currentImage={featuredImageUrl}
+                  currentAltText={featuredImageAlt}
+                  requireAltText={true}
                 />
               </div>
 

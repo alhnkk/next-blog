@@ -28,12 +28,14 @@ interface BlogPostPageProps {
 }
 
 interface Post {
-  id: string;
+  id: number;
   title: string;
   content: string;
+  slug: string;
   excerpt?: string;
   featured?: boolean;
   featuredImageUrl?: string;
+  featuredImageAlt?: string;
   createdAt: string;
   tags?: string[];
   author: {
@@ -43,7 +45,7 @@ interface Post {
     bio?: string;
   };
   category?: {
-    id: string;
+    id: number;
     name: string;
     slug: string;
   };
@@ -94,10 +96,10 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
     notFound();
   }
 
-  const post = postResult.data as Post;
+  const post = postResult.data;
   
   // Yorumları yükle
-  const commentsResult = await getCommentsByPostId(parseInt(post.id));
+  const commentsResult = await getCommentsByPostId(post.id);
   const comments = commentsResult.success ? commentsResult.data : [];
 
   // Session bilgisini al - basit yaklaşım
@@ -164,11 +166,12 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
             <div className="relative w-full h-80 mb-8 rounded-[1px] overflow-hidden">
               <Image
                 src={post.featuredImageUrl || "/placeholder.jpeg"}
-                alt={post.title}
+                alt={post.featuredImageAlt || post.title}
                 width={800}
                 height={320}
                 className="w-full h-full object-cover"
                 priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
               />
               {post.featured && (
                 <div className="absolute top-4 left-4">

@@ -14,6 +14,7 @@ interface Post {
   excerpt: string | null;
   featured: boolean;
   featuredImageUrl?: string | null;
+  featuredImageAlt?: string | null;
   status: string;
   tags: string[];
   createdAt: Date;
@@ -67,10 +68,14 @@ const BlogList = ({ posts, currentUser }: BlogListProps) => {
           >
             <Image
               src={post.featuredImageUrl || "/placeholder2.jpeg"}
-              alt={post.title}
+              alt={post.featuredImageAlt || post.title}
               width={400}
               height={302}
               className="w-full h-[256px] object-cover"
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAhEQACAQIHAQAAAAAAAAAAAAABAgMABAUGITFBUWGRkf/aAAwDAQACEQMRAD8A0XGrC2t2m1hbuLltQjrjcpYBnQAzq7AKCwDKMA9QdN9LGt5IA90tGm/qg7TkWKIApwHHPynhHI4xw2d36Lgs4HM0c1Y6xkZJHgBAhE4JK5QDyOPwP//Z"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
             />
           </Link>
           <CardContent className="px-0 py-0 flex flex-col max-w-lg">

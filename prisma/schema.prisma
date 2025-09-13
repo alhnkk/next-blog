@@ -22,6 +22,7 @@ model Post {
   excerpt      String?
   featured     Boolean   @default(false)
   featuredImageUrl String?
+  featuredImageAlt String?
   status       PostStatus @default(DRAFT)
   tags         String[]
   authorId     String

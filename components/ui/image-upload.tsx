@@ -16,14 +16,17 @@ import {
 import { toast } from "sonner"
 
 interface ImageUploadProps {
-  onImageSelect?: (file: File | null, url?: string) => void
+  onImageSelect?: (file: File | null, url?: string, altText?: string) => void
   currentImage?: string
+  currentAltText?: string
   className?: string
+  requireAltText?: boolean
 }
 
-export function ImageUpload({ onImageSelect, currentImage, className }: ImageUploadProps) {
+export function ImageUpload({ onImageSelect, currentImage, currentAltText, className, requireAltText = false }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(currentImage || null)
   const [imageUrl, setImageUrl] = useState("")
+  const [altText, setAltText] = useState(currentAltText || "")
   const [uploadMethod, setUploadMethod] = useState<"file" | "url">("file")
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -50,6 +53,11 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
+
+    if (requireAltText && !altText.trim()) {
+      toast.error("Alt text alanı zorunludur")
+      return
+    }
 
     // Show preview immediately
     const reader = new FileReader()
@@ -87,7 +95,7 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
 
       // Update preview with ImageKit URL
       setPreview(uploadResponse.url || null)
-      onImageSelect?.(null, uploadResponse.url)
+      onImageSelect?.(null, uploadResponse.url, altText)
       toast.success("Görsel başarıyla yüklendi!")
     } catch (error) {
       console.error("Upload error:", error)
@@ -106,7 +114,7 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
       
       // Reset preview on error
       setPreview(null)
-      onImageSelect?.(null)
+      onImageSelect?.(null, undefined, "")
     } finally {
       setIsUploading(false)
       setUploadProgress(0)
@@ -116,8 +124,12 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
 
   const handleUrlSubmit = () => {
     if (imageUrl.trim()) {
+      if (requireAltText && !altText.trim()) {
+        toast.error("Alt text alanı zorunludur")
+        return
+      }
       setPreview(imageUrl)
-      onImageSelect?.(null, imageUrl)
+      onImageSelect?.(null, imageUrl, altText)
       setImageUrl("")
     }
   }
@@ -130,9 +142,10 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
     
     setPreview(null)
     setImageUrl("")
+    setAltText("")
     setUploadProgress(0)
     setIsUploading(false)
-    onImageSelect?.(null)
+    onImageSelect?.(null, undefined, "")
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -196,7 +209,7 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
           </div>
 
           {uploadMethod === "file" ? (
-            <div>
+            <div className="space-y-3">
               <Input
                 ref={fileInputRef}
                 type="file"
@@ -208,7 +221,7 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
                 type="button"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
+                disabled={isUploading || (requireAltText && !altText.trim())}
                 className="w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 flex flex-col items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isUploading ? (
@@ -229,7 +242,7 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
               </Button>
             </div>
           ) : (
-            <div className="flex gap-2">
+            <div className="space-y-3">
               <Input
                 placeholder="Görsel URL'si girin..."
                 value={imageUrl}
@@ -239,7 +252,8 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
               <Button
                 type="button"
                 onClick={handleUrlSubmit}
-                disabled={!imageUrl.trim()}
+                disabled={!imageUrl.trim() || (requireAltText && !altText.trim())}
+                className="w-full"
               >
                 Ekle
               </Button>
@@ -247,6 +261,23 @@ export function ImageUpload({ onImageSelect, currentImage, className }: ImageUpl
           )}
         </div>
       )}
+      
+      {/* Alt Text Field - Always visible */}
+      <div className="mt-3 space-y-2">
+        <Label htmlFor="alt-text" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Alt Text {requireAltText && <span className="text-red-500">*</span>}
+        </Label>
+        <Input
+          id="alt-text"
+          placeholder="Görseli açıklayın..."
+          value={altText}
+          onChange={(e) => setAltText(e.target.value)}
+          className="text-sm"
+        />
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Görsel açıklaması SEO ve erişilebilirlik için önemlidir.
+        </p>
+      </div>
     </div>
   )
 }

@@ -53,6 +53,7 @@ export function NewPostEditor() {
   const [status, setStatus] = useState<PostStatus>(PostStatus.DRAFT)
   const [featured, setFeatured] = useState(false)
   const [featuredImageUrl, setFeaturedImageUrl] = useState("")
+  const [featuredImageAlt, setFeaturedImageAlt] = useState("")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
@@ -128,19 +129,22 @@ export function NewPostEditor() {
     setTags(tags.filter((tag) => tag !== tagToRemove))
   }
 
-  const handleImageSelect = (file: File | null, url?: string) => {
+  const handleImageSelect = (file: File | null, url?: string, altText?: string) => {
     if (url) {
       setFeaturedImageUrl(url)
+      setFeaturedImageAlt(altText || "")
     } else if (file) {
       // Handle file upload - you'd typically upload to a server here
       const reader = new FileReader()
       reader.onload = (e) => {
         const result = e.target?.result as string
         setFeaturedImageUrl(result)
+        setFeaturedImageAlt(altText || "")
       }
       reader.readAsDataURL(file)
     } else {
       setFeaturedImageUrl("")
+      setFeaturedImageAlt("")
     }
   }
 
@@ -169,6 +173,7 @@ export function NewPostEditor() {
         excerpt: excerpt.trim() || undefined,
         featured,
         featuredImageUrl: featuredImageUrl || undefined,
+        featuredImageAlt: featuredImageAlt || undefined,
         status: publishStatus,
         tags,
         authorId: session.user.id,
@@ -289,6 +294,8 @@ export function NewPostEditor() {
                 <ImageUpload
                   onImageSelect={handleImageSelect}
                   currentImage={featuredImageUrl}
+                  currentAltText={featuredImageAlt}
+                  requireAltText={true}
                 />
               </div>
 
