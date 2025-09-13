@@ -4,6 +4,30 @@ import { getPublishedPosts, getPostsByCategorySlug } from "@/lib/actions/posts";
 import { getCategories } from "@/lib/actions/categories";
 import { auth } from "@/lib/auth";
 import { ImageKitProvider } from "@imagekit/next";
+import { generateWebSiteSchema, generateOrganizationSchema, generateBlogSchema } from "@/lib/utils/structured-data";
+import { StructuredData } from "@/components/seo/structured-data";
+import { generateHomePageMetadata, generateCategoryMetadata } from "@/lib/utils/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  
+  if (resolvedSearchParams.category) {
+    const categoriesResult = await getCategories();
+    const categories = categoriesResult.success ? categoriesResult.data || [] : [];
+    const selectedCategory = categories.find((cat) => cat.slug === resolvedSearchParams.category);
+    
+    if (selectedCategory) {
+      return generateCategoryMetadata(selectedCategory);
+    }
+  }
+  
+  return generateHomePageMetadata();
+}
 
 const BlogPage = async ({
   searchParams,
@@ -47,8 +71,14 @@ const BlogPage = async ({
 
   const imagekitUrlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
 
+  // Structured data oluştur
+  const websiteSchema = generateWebSiteSchema();
+  const organizationSchema = generateOrganizationSchema();
+  const blogSchema = generateBlogSchema();
+
   return (
     <ImageKitProvider urlEndpoint={imagekitUrlEndpoint || ''}>
+      <StructuredData data={[websiteSchema, organizationSchema, blogSchema]} />
       <div className="max-w-7xl mx-auto py-10 lg:py-16 px-6 xl:px-0 flex flex-col lg:flex-row items-start justify-between gap-x-4">
         <div className="w-5/6">
           <h2 className="text-3xl font-bold tracking-tight">

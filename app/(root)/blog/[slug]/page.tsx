@@ -13,6 +13,13 @@ import Link from "next/link";
 import { Image, ImageKitProvider } from "@imagekit/next";
 import { notFound } from "next/navigation";
 import { ShareButton } from "@/components/share-button";
+import { generateArticleSchema } from "@/lib/utils/structured-data";
+import { StructuredData } from "@/components/seo/structured-data";
+import { generatePostMetadata } from "@/lib/utils/seo";
+import { calculateReadingTime, getWordCount, generateExcerpt } from "@/lib/utils/content-seo";
+import { generateBreadcrumbSchema } from "@/lib/utils/structured-data";
+import { Breadcrumb } from "@/components/seo/breadcrumb";
+import type { Metadata } from "next";
 
 interface BlogPostPageProps {
   params: {
@@ -65,6 +72,20 @@ interface Post {
   }>;
 }
 
+export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const postResult = await getPostBySlug(slug);
+  
+  if (!postResult.success || !postResult.data) {
+    return {
+      title: 'Gönderi Bulunamadı',
+      description: 'Aradığınız blog gönderisi bulunamadı.',
+    };
+  }
+
+  return generatePostMetadata(postResult.data);
+}
+
 const BlogPostPage = async ({ params }: BlogPostPageProps) => {
   const { slug } = await params;
   const postResult = await getPostBySlug(slug);
@@ -101,12 +122,38 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
 
   const imagekitUrlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
 
+  // Article schema oluştur
+  const articleSchema = generateArticleSchema(post);
+
+  // SEO bilgilerini hesapla
+  const readingTime = calculateReadingTime(post.content || '');
+  const wordCount = getWordCount(post.content || '');
+
+  // Breadcrumb schema oluştur
+  const breadcrumbItems = [
+    { name: 'Blog', url: '/' },
+    ...(post.category ? [{ name: post.category.name, url: `/?category=${post.category.slug}` }] : []),
+    { name: post.title, url: `/blog/${post.slug}` }
+  ];
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
+
   return (
     <ImageKitProvider urlEndpoint={imagekitUrlEndpoint || ''}>
+      <StructuredData data={[articleSchema, breadcrumbSchema]} />
       <div className="min-h-screen">
 
         {/* Main Content */}
         <main className="max-w-2xl mx-auto px-4 py-12">
+          {/* Breadcrumb */}
+          <Breadcrumb 
+            items={[
+              { label: 'Blog', href: '/' },
+              ...(post.category ? [{ label: post.category.name, href: `/?category=${post.category.slug}` }] : []),
+              { label: post.title }
+            ]}
+            className="mb-8"
+          />
+
           {/* Article Header */}
           <header className="mb-12">
             <h1 className="text-4xl md:text-4xl font-bold leading-tight mb-6">
@@ -163,9 +210,11 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
                       year: "numeric",
                     })}
                   </span>
+                  <span>•</span>
+                  <span>{readingTime} dk okuma</span>
+                  <span>•</span>
                   {post.category && (
                     <>
-                      <span>·</span>
                       <Link href={`/?category=${post.category.slug}`}>
                         <span className="cursor-pointer">
                           {post.category.name}
