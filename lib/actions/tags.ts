@@ -11,9 +11,7 @@ export async function getPopularTags(limit: number = 10) {
       where: {
         status: PostStatus.PUBLISHED,
         tags: {
-          not: {
-            equals: [],
-          },
+          isEmpty: false,
         },
       },
       select: {

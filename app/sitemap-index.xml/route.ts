@@ -1,15 +1,31 @@
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  const currentDate = new Date().toISOString()
   
   const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Ana sitemap (legacy) -->
   <sitemap>
     <loc>${baseUrl}/sitemap.xml</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
   </sitemap>
+  
+  <!-- Blog yazıları sitemap'i -->
+  <sitemap>
+    <loc>${baseUrl}/posts-sitemap.xml</loc>
+    <lastmod>${currentDate}</lastmod>
+  </sitemap>
+  
+  <!-- Kategoriler ve sayfalar sitemap'i -->
+  <sitemap>
+    <loc>${baseUrl}/categories-sitemap.xml</loc>
+    <lastmod>${currentDate}</lastmod>
+  </sitemap>
+  
+  <!-- Resim sitemap'i -->
   <sitemap>
     <loc>${baseUrl}/image-sitemap.xml</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
   </sitemap>
 </sitemapindex>`
 

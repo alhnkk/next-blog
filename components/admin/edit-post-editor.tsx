@@ -318,13 +318,28 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
             <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
               {/* Title */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Başlık</Label>
+                <div className="flex justify-between items-center">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Başlık</Label>
+                  <span className={`text-xs ${title.length > 60 ? 'text-red-500' : title.length > 50 ? 'text-yellow-500' : 'text-muted-foreground'}`}>
+                    {title.length}/60
+                  </span>
+                </div>
                 <Input
-                  placeholder="Bir Başlık Yazın"
+                  placeholder="Bir Başlık Yazın (SEO için 30-60 karakter önerilir)"
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   className="text-xl lg:text-2xl font-bold border-b border-x-0 border-t-0 bg-accent border rounded-none px-3 py-4 lg:py-6 focus-visible:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:bg-background dark:text-gray-100"
                 />
+                {title.length > 60 && (
+                  <p className="text-xs text-red-500">
+                    SEO için idealden uzun. 60 karakteri geçmeyin.
+                  </p>
+                )}
+                {title.length < 30 && title.length > 0 && (
+                  <p className="text-xs text-yellow-500">
+                    SEO için biraz kısa. 30-60 karakter arası önerilir.
+                  </p>
+                )}
               </div>
 
               {/* Slug */}
@@ -361,14 +376,29 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
 
               {/* Excerpt */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Özet</Label>
+                <div className="flex justify-between items-center">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Özet</Label>
+                  <span className={`text-xs ${excerpt.length > 160 ? 'text-red-500' : excerpt.length > 140 ? 'text-yellow-500' : 'text-muted-foreground'}`}>
+                    {excerpt.length}/160
+                  </span>
+                </div>
                 <Textarea
-                  placeholder="Kısa bir açıklama yazın..."
+                  placeholder="Kısa bir açıklama yazın... (SEO için 120-160 karakter önerilir)"
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
                   rows={3}
                   className="resize-none text-base lg:text-lg font-medium border-b border-x-0 border-t-0 bg-accent border rounded-none px-3 py-2 h-20 lg:h-24 focus-visible:ring-0 placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:bg-background dark:text-gray-100"
                 />
+                {excerpt.length > 160 && (
+                  <p className="text-xs text-red-500">
+                    SEO için idealden uzun. 160 karakteri geçmeyin.
+                  </p>
+                )}
+                {excerpt.length < 120 && excerpt.length > 0 && (
+                  <p className="text-xs text-yellow-500">
+                    SEO için biraz kısa. 120-160 karakter arası önerilir.
+                  </p>
+                )}
               </div>
 
               {/* Featured Image */}

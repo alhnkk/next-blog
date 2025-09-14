@@ -7,7 +7,7 @@ import UserNav from "@/components/user-nav";
 
 const AdminNavbar = () => {
   return (
-    <nav className="p-4 flex items-center justify-between">
+    <nav className="p-4 flex items-center justify-between border-b">
       {/* Left */}
       <SidebarTrigger />
       {/* Right */}

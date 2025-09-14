@@ -19,12 +19,18 @@ import { generatePostMetadata } from "@/lib/utils/seo";
 import { calculateReadingTime, getWordCount, generateExcerpt } from "@/lib/utils/content-seo";
 import { generateBreadcrumbSchema } from "@/lib/utils/structured-data";
 import { Breadcrumb } from "@/components/seo/breadcrumb";
+import { RelatedPosts } from "@/components/related-posts";
+import { findRelatedPosts } from "@/lib/utils/related-posts";
+import { getPublishedPosts } from "@/lib/actions/posts";
+import { EnhancedContent } from "@/components/enhanced-content";
+import { getCategories } from "@/lib/actions/categories";
+import { getPopularTags } from "@/lib/actions/tags";
 import type { Metadata } from "next";
 
 interface BlogPostPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 interface Post {
@@ -130,6 +136,65 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
   // SEO bilgilerini hesapla
   const readingTime = calculateReadingTime(post.content || '');
   const wordCount = getWordCount(post.content || '');
+
+  // İlgili postları ve diğer verileri getir
+  const [allPostsResult, categoriesResult, popularTagsResult] = await Promise.all([
+    getPublishedPosts(),
+    getCategories(),
+    getPopularTags(10)
+  ]);
+  
+  const allPosts = allPostsResult.success ? allPostsResult.data || [] : [];
+  const categories = categoriesResult.success ? categoriesResult.data || [] : [];
+  const popularTags = popularTagsResult.success ? popularTagsResult.data || [] : [];
+  
+  // Post tipini related-posts utility'sine uygun hale getir
+  const postForRelated = {
+    id: Number(post.id),
+    title: post.title,
+    slug: post.slug,
+    excerpt: post.excerpt,
+    tags: post.tags || [],
+    categoryId: post.category?.id || null,
+    createdAt: new Date(post.createdAt),
+    author: {
+      name: post.author.name
+    }
+  };
+  
+  const allPostsForRelated = allPosts.map(p => ({
+    id: Number(p.id),
+    title: p.title,
+    slug: p.slug,
+    excerpt: p.excerpt,
+    tags: p.tags || [],
+    categoryId: p.category?.id || null,
+    createdAt: new Date(p.createdAt),
+    author: {
+      name: p.author.name
+    }
+  }));
+  
+  const relatedPosts = findRelatedPosts(postForRelated, allPostsForRelated, 3);
+  
+  // İlgili postları original format'a çevir
+  const relatedPostsForComponent = relatedPosts.map(rp => {
+    const originalPost = allPosts.find(p => Number(p.id) === rp.id);
+    return originalPost ? {
+      id: Number(originalPost.id),
+      title: originalPost.title,
+      slug: originalPost.slug,
+      excerpt: originalPost.excerpt,
+      featuredImageUrl: originalPost.featuredImageUrl,
+      featuredImageAlt: originalPost.featuredImageAlt,
+      tags: originalPost.tags || [],
+      createdAt: new Date(originalPost.createdAt),
+      author: {
+        name: originalPost.author.name
+      },
+      category: originalPost.category
+    } : null;
+  }).filter(Boolean);
 
   // Breadcrumb schema oluştur
   const breadcrumbItems = [
@@ -253,9 +318,12 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
         {/* Article Content */}
         <article className="blog-content">
           {post.content ? (
-            <div 
-              className="leading-relaxed text-base"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+            <EnhancedContent
+              content={post.content}
+              categories={categories}
+              popularTags={popularTags}
+              relatedPosts={relatedPostsForComponent.slice(0, 3)} // Sadece ilk 3'ü
+              currentPostId={Number(post.id)}
             />
           ) : (
             <div className="text-center py-12">
@@ -305,6 +373,12 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
             </div>
           </div>
         </div>
+
+        {/* Related Posts */}
+        <RelatedPosts 
+          posts={relatedPostsForComponent}
+          readingTime={readingTime}
+        />
 
         {/* Comments Section */}
         <CommentsSection

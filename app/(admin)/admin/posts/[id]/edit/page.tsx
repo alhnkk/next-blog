@@ -5,13 +5,14 @@ import { AlertTriangle } from "lucide-react";
 import { notFound } from "next/navigation";
 
 interface EditPostPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const EditPostPage = async ({ params }: EditPostPageProps) => {
-  const postId = parseInt(params.id);
+  const { id } = await params;
+  const postId = parseInt(id);
   
   if (isNaN(postId)) {
     notFound();

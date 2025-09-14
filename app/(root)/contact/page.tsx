@@ -10,17 +10,10 @@ import { useState } from "react";
 import { createMessage } from "@/lib/actions/messages";
 import { toast } from "@/hooks/use-toast";
 
-interface ContactProps {
-  title?: string;
-  description?: string;
-  email?: string;
-}
-
-const Contact = ({
-  title = "İletişim",
-  description = "Sorularınız, geri bildirimleriniz veya işbirliği için yazabilirsiniz. Nasıl yardımcı olabileceğim hakkında bilgi vermeyi unutmayın.",
-  email = "alhnkk@gmail.com",
-}: ContactProps) => {
+const Contact = () => {
+  const title = "İletişim";
+  const description = "Sorularınız, geri bildirimleriniz veya işbirliği için yazabilirsiniz. Nasıl yardımcı olabileceğim hakkında bilgi vermeyi unutmayın.";
+  const email = "alhnkk@gmail.com";
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",

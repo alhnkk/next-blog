@@ -5,13 +5,14 @@ import { AlertTriangle } from "lucide-react";
 import { notFound } from "next/navigation";
 
 interface EditCategoryPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const EditCategoryPage = async ({ params }: EditCategoryPageProps) => {
-  const categoryId = parseInt(params.id);
+  const { id } = await params;
+  const categoryId = parseInt(id);
   
   if (isNaN(categoryId)) {
     notFound();

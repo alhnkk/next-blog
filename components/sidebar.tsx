@@ -29,9 +29,16 @@ interface Category {
   };
 }
 
+interface PopularTag {
+  name: string;
+  count: number;
+}
+
 interface SidebarProps {
   categories: Category[];
+  popularTags?: PopularTag[];
   selectedCategory?: string;
+  selectedTag?: string;
 }
 
 // Icon mapping for categories
@@ -45,7 +52,7 @@ const iconMap: { [key: string]: unknown } = {
   hash: Hash,
 };
 
-const Sidebar = ({ categories, selectedCategory }: SidebarProps) => {
+const Sidebar = ({ categories, popularTags = [], selectedCategory, selectedTag }: SidebarProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -56,8 +63,25 @@ const Sidebar = ({ categories, selectedCategory }: SidebarProps) => {
       // Aynı kategoriye tıklanırsa filtreyi kaldır
       params.delete("category");
     } else {
-      // Yeni kategori seç
+      // Yeni kategori seç ve tag filtresini temizle
       params.set("category", categorySlug);
+      params.delete("tag");
+    }
+
+    const queryString = params.toString();
+    router.push(queryString ? `/?${queryString}` : "/");
+  };
+
+  const handleTagClick = (tagName: string) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (selectedTag === tagName) {
+      // Aynı tag'e tıklanırsa filtreyi kaldır
+      params.delete("tag");
+    } else {
+      // Yeni tag seç ve kategori filtresini temizle
+      params.set("tag", tagName);
+      params.delete("category");
     }
 
     const queryString = params.toString();
@@ -117,6 +141,38 @@ const Sidebar = ({ categories, selectedCategory }: SidebarProps) => {
           );
         })}
       </div>
+      
+      {/* Popüler Etiketler */}
+      {popularTags.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-2xl font-bold tracking-tight mb-4">Popüler Etiketler</h3>
+          <div className="flex flex-wrap gap-2">
+            {popularTags.map((tag) => {
+              const isSelected = selectedTag === tag.name;
+              
+              return (
+                <div
+                  key={tag.name}
+                  onClick={() => handleTagClick(tag.name)}
+                  className={cn(
+                    "inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm cursor-pointer transition-colors hover:bg-primary/20",
+                    isSelected 
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-muted hover:bg-muted/80"
+                  )}
+                >
+                  <Hash className="h-3 w-3" />
+                  <span>{tag.name}</span>
+                  <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
+                    {tag.count}
+                  </Badge>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      
       <AdPlaceholder />
     </div>
   );

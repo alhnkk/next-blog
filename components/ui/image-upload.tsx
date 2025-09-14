@@ -54,11 +54,6 @@ export function ImageUpload({ onImageSelect, currentImage, currentAltText, class
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (requireAltText && !altText.trim()) {
-      toast.error("Alt text alanı zorunludur")
-      return
-    }
-
     // Show preview immediately
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -97,6 +92,13 @@ export function ImageUpload({ onImageSelect, currentImage, currentAltText, class
       setPreview(uploadResponse.url || null)
       onImageSelect?.(null, uploadResponse.url, altText)
       toast.success("Görsel başarıyla yüklendi!")
+      
+      // Remind user to add alt text if required and empty
+      if (requireAltText && !altText.trim()) {
+        setTimeout(() => {
+          toast.info("Alt text eklemeyi unutmayın!")
+        }, 1000)
+      }
     } catch (error) {
       console.error("Upload error:", error)
       
@@ -221,7 +223,7 @@ export function ImageUpload({ onImageSelect, currentImage, currentAltText, class
                 type="button"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading || (requireAltText && !altText.trim())}
+                disabled={isUploading}
                 className="w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 flex flex-col items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isUploading ? (

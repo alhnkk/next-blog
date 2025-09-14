@@ -9,6 +9,9 @@ const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'arial'],
 });
 
 export const metadata: Metadata = {
@@ -73,6 +76,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <link rel="preload" href="/logo.jpeg" as="image" type="image/jpeg" />
+        <link rel="dns-prefetch" href="//ik.imagekit.io" />
+        <link rel="preconnect" href="https://ik.imagekit.io" crossOrigin="anonymous" />
+        <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+      </head>
       <body className={`${poppins.className} antialiased`}>
         <ThemeProvider
           attribute="class"
