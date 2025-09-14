@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Save, Palette, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { createCategory } from "@/lib/actions/categories";
+import { generateSlug } from "@/lib/utils/slug";
 import {
   Dialog,
   DialogContent,
@@ -36,21 +37,6 @@ export function NewCategoryModal() {
     icon: ""
   });
 
-  // Slug otomatik oluşturma
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/ş/g, 's')
-      .replace(/ı/g, 'i')
-      .replace(/ö/g, 'o')
-      .replace(/ç/g, 'c')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  };
 
   const handleNameChange = (value: string) => {
     setFormData(prev => ({
@@ -165,7 +151,7 @@ export function NewCategoryModal() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  URL'de görünecek kategori adresi
+                  URL&apos;de görünecek kategori adresi
                 </p>
               </div>
 

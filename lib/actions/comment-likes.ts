@@ -120,7 +120,7 @@ export async function getCommentLikeStatus(commentId: number) {
     }
 
     // Kullanıcının beğenisi var mı kontrol et
-    const userLike = await prisma.commentLike.findUnique({
+    const userLike = await prismadb.commentLike.findUnique({
       where: {
         userId_commentId: {
           userId: session.user.id,
@@ -130,7 +130,7 @@ export async function getCommentLikeStatus(commentId: number) {
     });
 
     // Toplam beğeni sayısını al
-    const likeCount = await prisma.commentLike.count({
+    const likeCount = await prismadb.commentLike.count({
       where: { commentId: commentId },
     });
 
@@ -156,7 +156,7 @@ export async function getCommentLikes(commentId: number, page = 1, limit = 20) {
     const skip = (page - 1) * limit;
 
     const [likes, total] = await Promise.all([
-      prisma.commentLike.findMany({
+      prismadb.commentLike.findMany({
         where: { commentId: commentId },
         include: {
           user: {
@@ -173,7 +173,7 @@ export async function getCommentLikes(commentId: number, page = 1, limit = 20) {
         skip,
         take: limit,
       }),
-      prisma.commentLike.count({
+      prismadb.commentLike.count({
         where: { commentId: commentId },
       }),
     ]);

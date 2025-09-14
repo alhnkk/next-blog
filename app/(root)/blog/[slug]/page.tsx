@@ -120,8 +120,6 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
       currentUser = {
         id: session.user.id,
         name: session.user.name,
-        image: session.user.image,
-        role: session.user.role,
       };
     }
   } catch (error) {
@@ -297,7 +295,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
             {/* Social Actions */}
             <div className="flex items-center gap-4">
               <LikeButton
-                postId={parseInt(post.id)}
+                postId={post.id}
                 initialCount={post._count.likes}
                 currentUser={currentUser}
                 variant="ghost"
@@ -322,7 +320,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
               content={post.content}
               categories={categories}
               popularTags={popularTags}
-              relatedPosts={relatedPostsForComponent.slice(0, 3)} // Sadece ilk 3'ü
+              relatedPosts={relatedPostsForComponent.filter(p => p !== null).slice(0, 3)} // Sadece ilk 3'ü
               currentPostId={Number(post.id)}
             />
           ) : (
@@ -376,13 +374,13 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
 
         {/* Related Posts */}
         <RelatedPosts 
-          posts={relatedPostsForComponent}
+          posts={relatedPostsForComponent.filter(p => p !== null)}
           readingTime={readingTime}
         />
 
         {/* Comments Section */}
         <CommentsSection
-          postId={parseInt(post.id)}
+          postId={post.id}
           initialComments={[]}
           currentUser={currentUser}
         />

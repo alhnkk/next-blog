@@ -123,11 +123,11 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                   </Avatar>
                   <div className="flex-1">
                     <Input
-                      placeholder="Profil fotoğrafı URL'si"
+                      placeholder="Profil fotoğrafı URL&apos;si"
                       {...field}
                     />
                     <FormDescription>
-                      Profil fotoğrafınızın URL'sini girin
+                      Profil fotoğrafınızın URL&apos;sini girin
                     </FormDescription>
                   </div>
                 </div>

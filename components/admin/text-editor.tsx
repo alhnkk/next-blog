@@ -66,6 +66,7 @@ export default function RichTextEditor({
         bulletList: false,
         orderedList: false,
         listItem: false,
+        link: false,
       }),
       Heading.configure({
         levels: [1, 2, 3, 4, 5, 6],

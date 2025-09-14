@@ -64,8 +64,10 @@ export async function getUserById(userId: string) {
         banReason: true,
         banExpires: true,
         _count: {
-          posts: true,
-          comments: true,
+          select: {
+            posts: true,
+            comments: true,
+          },
         },
       },
     });
@@ -113,8 +115,10 @@ export async function getUserByEmail(email: string) {
         banReason: true,
         banExpires: true,
         _count: {
-          posts: true,
-          comments: true,
+          select: {
+            posts: true,
+            comments: true,
+          },
         },
       },
     });

@@ -117,26 +117,3 @@ export const getPostsByTags = (
   return scoredPosts.slice(0, limit).map(item => item.post)
 }
 
-// Son postlar
-export const getRecentPosts = (
-  allPosts: Post[],
-  excludeId: number,
-  limit: number = 5
-): Post[] => {
-  return allPosts
-    .filter(post => post.id !== excludeId)
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, limit)
-}
-
-// Popüler postlar (şimdilik sadece yeni tarihli olanları döndürüyor)
-// Gelecekte like/view sayıları eklenebilir
-export const getPopularPosts = (
-  allPosts: Post[],
-  excludeId: number,
-  limit: number = 5
-): Post[] => {
-  // Şimdilik en yeni postları popüler kabul ediyoruz
-  // Gelecekte gerçek popülerlik metrikleri eklenebilir
-  return getRecentPosts(allPosts, excludeId, limit)
-}

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save, Palette, Hash, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { updateCategory, deleteCategory } from "@/lib/actions/categories";
+import { generateSlug } from "@/lib/utils/slug";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,21 +58,6 @@ export function EditCategoryEditor({ category }: EditCategoryEditorProps) {
     icon: category.icon || ""
   });
 
-  // Slug otomatik oluşturma
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/ş/g, 's')
-      .replace(/ı/g, 'i')
-      .replace(/ö/g, 'o')
-      .replace(/ç/g, 'c')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  };
 
   const handleNameChange = (value: string) => {
     setFormData(prev => ({
@@ -149,7 +135,7 @@ export function EditCategoryEditor({ category }: EditCategoryEditorProps) {
     if (formData.slug) {
       window.open(`/?category=${formData.slug}`, "_blank");
     } else {
-      toast.error("Önce kategori slug'ını oluşturun");
+      toast.error("Önce kategori slug&apos;ını oluşturun");
     }
   };
 
@@ -189,7 +175,7 @@ export function EditCategoryEditor({ category }: EditCategoryEditorProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Kategoriyi Sil</AlertDialogTitle>
                 <AlertDialogDescription>
-                  <strong>"{category.name}"</strong> kategorisini silmek istediğinizden emin misiniz? 
+                  <strong>&quot;{category.name}&quot;</strong> kategorisini silmek istediğinizden emin misiniz? 
                   Bu işlem geri alınamaz.
                   {category._count.posts > 0 && (
                     <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
@@ -268,7 +254,7 @@ export function EditCategoryEditor({ category }: EditCategoryEditorProps) {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    URL'de görünecek kategori adresi
+                    URL&apos;de görünecek kategori adresi
                   </p>
                 </div>
 

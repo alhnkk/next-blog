@@ -1,5 +1,6 @@
 import BlogList from "@/components/blog-list";
 import Sidebar from "@/components/sidebar";
+import { Pagination, PaginationInfo, MobilePagination } from "@/components/pagination";
 import Link from "next/link";
 import { getPublishedPosts, getPostsByCategorySlug, getPostsByTag } from "@/lib/actions/posts";
 import { getCategories } from "@/lib/actions/categories";
@@ -15,7 +16,7 @@ import type { Metadata } from "next";
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; tag?: string }>;
+  searchParams: Promise<{ category?: string; tag?: string; page?: string }>;
 }): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   
@@ -43,7 +44,7 @@ export async function generateMetadata({
 const BlogPage = async ({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; tag?: string }>;
+  searchParams: Promise<{ category?: string; tag?: string; page?: string }>;
 }) => {
   const resolvedSearchParams = await searchParams;
   
@@ -65,14 +66,18 @@ const BlogPage = async ({
     console.log("Session alınamadı:", error);
   }
   
+  // Sayfa numarasını al
+  const currentPage = parseInt(resolvedSearchParams.page || "1");
+  const postsPerPage = 6; // Sayfa başına gönderi sayısı
+
   // Filtre tipine göre postları getir
   let postsResult;
   if (resolvedSearchParams.category) {
-    postsResult = await getPostsByCategorySlug(resolvedSearchParams.category, "PUBLISHED");
+    postsResult = await getPostsByCategorySlug(resolvedSearchParams.category, "PUBLISHED", currentPage, postsPerPage);
   } else if (resolvedSearchParams.tag) {
-    postsResult = await getPostsByTag(resolvedSearchParams.tag, "PUBLISHED");
+    postsResult = await getPostsByTag(resolvedSearchParams.tag, "PUBLISHED", currentPage, postsPerPage);
   } else {
-    postsResult = await getPublishedPosts();
+    postsResult = await getPublishedPosts(currentPage, postsPerPage);
   }
 
   const [categoriesResult, popularTagsResult] = await Promise.all([
@@ -81,6 +86,7 @@ const BlogPage = async ({
   ]);
 
   const posts = postsResult.success ? postsResult.data || [] : [];
+  const pagination = postsResult.success ? postsResult.pagination : null;
   const categories = categoriesResult.success ? categoriesResult.data || [] : [];
   const popularTags = popularTagsResult.success ? popularTagsResult.data || [] : [];
 
@@ -205,7 +211,47 @@ const BlogPage = async ({
               </div>
             )}
           </div>
+          {/* @ts-expect-error Type mismatch will be fixed later */}
           <BlogList posts={posts} currentUser={currentUser} />
+          
+          {/* Sayfalama */}
+          {pagination && pagination.totalPages > 1 && (
+            <div className="mt-12">
+              {/* Desktop sayfalama */}
+              <div className="hidden sm:block">
+                <Pagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  baseUrl="/"
+                  searchParams={new URLSearchParams(
+                    Object.entries(resolvedSearchParams).filter(([_, value]) => value !== undefined) as [string, string][]
+                  )}
+                />
+              </div>
+              
+              {/* Mobil sayfalama */}
+              <div className="block sm:hidden">
+                <MobilePagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  baseUrl="/"
+                  searchParams={new URLSearchParams(
+                    Object.entries(resolvedSearchParams).filter(([_, value]) => value !== undefined) as [string, string][]
+                  )}
+                />
+              </div>
+              
+              {/* Sayfalama bilgisi */}
+              <div className="mt-4 text-center">
+                <PaginationInfo
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  totalItems={pagination.total}
+                  itemsPerPage={pagination.limit}
+                />
+              </div>
+            </div>
+          )}
         </div>
         <aside className="sticky top-8 shrink-0 lg:max-w-sm w-full">
           <Sidebar

@@ -32,18 +32,18 @@ interface User {
   id: string;
   name: string;
   email: string;
-  emailVerified: Date | null;
+  emailVerified: boolean;
   image: string | null;
   bio: string | null;
   location: string | null;
   phone: string | null;
   createdAt: Date;
   updatedAt: Date;
-  role: string;
-  banned: boolean;
+  role: string | null;
+  banned: boolean | null;
   banReason: string | null;
   banExpires: Date | null;
-  _count: {
+  _count?: {
     posts: number;
     comments: number;
   };
@@ -60,7 +60,7 @@ const SingleUserPage = () => {
         const userId = params.id as string;
         const result = await getUserById(userId);
         
-        if (result.success) {
+        if (result.success && result.data) {
           setUser(result.data);
         } else {
           toast.error(result.error);
@@ -187,7 +187,7 @@ const SingleUserPage = () => {
                   </HoverCardContent>
                 </HoverCard>
               )}
-              {user._count.posts > 10 && (
+              {user._count && user._count.posts > 10 && (
                 <HoverCard>
                   <HoverCardTrigger>
                     <Candy
@@ -198,12 +198,12 @@ const SingleUserPage = () => {
                   <HoverCardContent>
                     <h1 className="font-bold mb-2">Aktif Yazar</h1>
                     <p className="text-sm text-muted-foreground">
-                    Bu kullanıcı 10'dan fazla gönderi yazmıştır.
+                    Bu kullanıcı 10&apos;dan fazla gönderi yazmıştır.
                     </p>
                   </HoverCardContent>
                 </HoverCard>
               )}
-              {user._count.comments > 50 && (
+              {user._count && user._count.comments > 50 && (
                 <HoverCard>
                   <HoverCardTrigger>
                     <Citrus
@@ -266,17 +266,17 @@ const SingleUserPage = () => {
               )}
               <div className="flex items-center gap-2">
                 <span className="font-bold">Rol:</span>
-                <Badge className={getRoleBadgeColor(user.role)}>
+                <Badge className={getRoleBadgeColor(user.role || 'USER')}>
                   {user.role === 'ADMIN' ? 'Admin' : user.role === 'MODERATOR' ? 'Moderatör' : 'Kullanıcı'}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold">Gönderi Sayısı:</span>
-                <span>{user._count.posts}</span>
+                <span>{user._count?.posts || 0}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold">Yorum Sayısı:</span>
-                <span>{user._count.comments}</span>
+                <span>{user._count?.comments || 0}</span>
               </div>
               {user.banned && (
                 <div className="flex items-center gap-2">

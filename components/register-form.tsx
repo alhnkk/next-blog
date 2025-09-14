@@ -132,12 +132,13 @@ export default function RegisterForm() {
 						<div className="flex items-end gap-4">
 							{imagePreview && (
 								<div className="relative w-16 h-16 rounded-sm overflow-hidden">
-									<Image
-										src={imagePreview}
-										alt="Profile preview"
-										layout="fill"
-										objectFit="cover"
-									/>
+								<Image
+									src={imagePreview}
+									alt="Profile preview"
+									fill
+									style={{ objectFit: "cover" }}
+									sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+								/>
 								</div>
 							)}
 							<div className="flex items-center gap-2 w-full">

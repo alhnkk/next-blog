@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Key, Loader2 } from "lucide-react";
+import { formatTimeAgo } from "@/lib/utils/date";
+import { Key } from "lucide-react";
+import { CenterLoading } from "@/components/ui/loading";
 import { getUsers } from "@/lib/actions/users";
 import { getRecentMessages, Message } from "@/lib/actions/messages";
 
@@ -119,8 +121,17 @@ interface User {
   id: string;
   name: string;
   email: string;
-  image?: string;
+  emailVerified: boolean;
+  image: string | null;
+  bio: string | null;
+  location: string | null;
+  phone: string | null;
+  role: string | null;
+  banned: boolean | null;
+  banReason: string | null;
+  banExpires: Date | null;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const CardList = ({ title }: { title: string }) => {
@@ -161,26 +172,13 @@ const CardList = ({ title }: { title: string }) => {
     }
   }, [title]);
 
-  const formatDate = (date: Date) => {
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 24) {
-      return `${diffInHours}s önce`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays}g önce`;
-    }
-  };
 
   if (title === "Son Üyeler") {
     if (isLoading) {
       return (
         <div className="">
           <h1 className="text-lg font-medium mb-6">{title}</h1>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-          </div>
+          <CenterLoading size="sm" message="" />
         </div>
       );
     }
@@ -213,7 +211,7 @@ const CardList = ({ title }: { title: string }) => {
                 <CardContent className="flex-1 p-0">
                   <CardTitle className="text-sm font-medium">{user.name}</CardTitle>
                   <Badge variant="secondary" className="text-xs">
-                    {formatDate(user.createdAt)}
+                    {formatTimeAgo(user.createdAt)}
                   </Badge>
                 </CardContent>
                 <CardFooter className="p-0">
@@ -235,9 +233,7 @@ const CardList = ({ title }: { title: string }) => {
       return (
         <div className="">
           <h1 className="text-lg font-medium mb-6">{title}</h1>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-          </div>
+          <CenterLoading size="sm" message="" />
         </div>
       );
     }
@@ -278,7 +274,7 @@ const CardList = ({ title }: { title: string }) => {
                 </CardContent>
                 <CardFooter className="p-0">
                   <div className="text-xs text-gray-500">
-                    {formatDate(message.createdAt)}
+                    {formatTimeAgo(message.createdAt)}
                   </div>
                 </CardFooter>
               </Card>

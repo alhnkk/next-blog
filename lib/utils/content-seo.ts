@@ -211,8 +211,8 @@ export const calculateSEOScore = (
 }
 
 // SEO önerileri oluştur
-const generateRecommendations = (checks: any[]) => {
-  const recommendations = []
+const generateRecommendations = (checks: { status: string; name: string; [key: string]: any }[]) => {
+  const recommendations: string[] = []
   
   const failedChecks = checks.filter(check => check.status === 'fail')
   

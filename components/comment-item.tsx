@@ -8,6 +8,7 @@ import { CommentForm } from "./comment-form";
 import { deleteComment, updateComment } from "@/lib/actions/comments";
 import { toggleCommentLike, getCommentLikeStatus } from "@/lib/actions/comment-likes";
 import { toast } from "@/hooks/use-toast";
+import { formatTimeAgo } from "@/lib/utils/date";
 import {
   MoreHorizontal,
   Reply,
@@ -253,24 +254,6 @@ export function CommentItem({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-
-    if (diffInHours < 1) {
-      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-      return diffInMinutes < 1 ? "Az önce" : `${diffInMinutes} dakika önce`;
-    } else if (diffInHours < 24) {
-      return `${diffInHours} saat önce`;
-    } else {
-      return date.toLocaleDateString("tr-TR", {
-        day: "numeric",
-        month: "short",
-        year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-      });
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -295,7 +278,7 @@ export function CommentItem({
             <div className="flex items-center gap-2">
               <span className="font-medium text-sm">{comment.author.name}</span>
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {formatDate(comment.createdAt)}
+                {formatTimeAgo(comment.createdAt)}
                 {comment.updatedAt !== comment.createdAt && (
                   <span className="ml-1">(düzenlendi)</span>
                 )}

@@ -11,12 +11,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { 
   Settings, 
   Palette, 
-  Image, 
+  Image as ImageIcon, 
   Save, 
   RotateCcw,
   Eye,
   Upload
 } from "lucide-react";
+import Image from "next/image";
 import { 
   getSettings, 
   updateSettings, 
@@ -84,7 +85,7 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       const result = await updateSettings(formData);
-      if (result.success) {
+      if (result.success && result.settings) {
         setSettings(result.settings);
         toast({
           title: "Başarılı",
@@ -111,7 +112,7 @@ export default function SettingsPage() {
   const handleReset = async () => {
     try {
       const result = await resetSettings();
-      if (result.success) {
+      if (result.success && result.settings) {
         setSettings(result.settings);
         setFormData({
           siteName: result.settings.siteName,
@@ -195,7 +196,7 @@ export default function SettingsPage() {
             Görünüm
           </TabsTrigger>
           <TabsTrigger value="media">
-            <Image className="h-4 w-4 mr-2" />
+            <ImageIcon className="h-4 w-4 mr-2" />
             Medya
           </TabsTrigger>
         </TabsList>
@@ -417,9 +418,11 @@ export default function SettingsPage() {
                   <div className="mt-2">
                     <Label>Logo Önizlemesi</Label>
                     <div className="mt-1 p-4 border rounded-lg">
-                      <img 
+                      <Image 
                         src={formData.siteLogo} 
                         alt="Logo önizlemesi" 
+                        width={128}
+                        height={64}
                         className="max-h-16 max-w-32 object-contain"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';

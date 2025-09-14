@@ -16,6 +16,8 @@ import { getCategories } from "@/lib/actions/categories"
 import { useSession } from "@/lib/auth-client"
 import { PostStatus } from "@/lib/generated/prisma"
 import { toast } from "sonner"
+import { generateSlug } from "@/lib/utils/slug"
+import { PageLoading } from "@/components/ui/loading"
 import {
   Save,
   Send,
@@ -71,7 +73,7 @@ export function NewPostEditor() {
     const loadCategories = async () => {
       try {
         const result = await getCategories()
-        if (result.success) {
+        if (result.success && result.data) {
           setCategories(result.data)
         } else {
           toast.error("Kategoriler yüklenirken hata oluştu")
@@ -94,29 +96,6 @@ export function NewPostEditor() {
     }
   }, [title, isSlugManuallyEdited])
 
-  const generateSlug = (text: string): string => {
-    return text
-      .toLowerCase()
-      .trim()
-      // Turkish characters to English
-      .replace(/ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/ş/g, 's')
-      .replace(/ı/g, 'i')
-      .replace(/ö/g, 'o')
-      .replace(/ç/g, 'c')
-      .replace(/Ğ/g, 'g')
-      .replace(/Ü/g, 'u')
-      .replace(/Ş/g, 's')
-      .replace(/İ/g, 'i')
-      .replace(/Ö/g, 'o')
-      .replace(/Ç/g, 'c')
-      // Remove special characters and replace spaces with hyphens
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-  }
 
   const addTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -197,14 +176,7 @@ export function NewPostEditor() {
 
   // Loading state
   if (isPending || !session) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-5rem)]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p>Yükleniyor...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading message="Editör yükleniyor..." />
   }
 
   return (

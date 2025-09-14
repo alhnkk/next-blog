@@ -29,17 +29,15 @@ const AdminLayout = async ({
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
   return (
-    <html lang="en">
-      <body className="flex">
-        <SidebarProvider defaultOpen={defaultOpen}>
-          <AppSidebar />
-          <main className="w-full">
-            <AdminNavbar />
-            <div className="px-4">{children}</div>
-          </main>
-        </SidebarProvider>
-      </body>
-    </html>
+    <div className="flex">
+      <SidebarProvider defaultOpen={defaultOpen}>
+        <AppSidebar />
+        <main className="w-full">
+          <AdminNavbar />
+          <div className="px-4">{children}</div>
+        </main>
+      </SidebarProvider>
+    </div>
   );
 };
 export default AdminLayout;

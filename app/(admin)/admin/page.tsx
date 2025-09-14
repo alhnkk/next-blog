@@ -24,7 +24,8 @@ const AdminDashboard = () => {
       className="absolute grayscale-75 rounded-md z-0"
       src={backgroundImage}
       alt="Dashboard Background" 
-      fill />
+      fill 
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
       {/* <AppAreaChart /> */}
       <Image 
       className="rounded-full z-0 flex m-auto"

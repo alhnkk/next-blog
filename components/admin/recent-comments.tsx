@@ -5,18 +5,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAllComments } from "@/lib/actions/comments";
-import { MessageSquare, Eye, Loader2 } from "lucide-react";
+import { formatTimeAgo, truncateText } from "@/lib/utils/date";
+import { MessageSquare, Eye } from "lucide-react";
+import { CenterLoading } from "@/components/ui/loading";
+import { EmptyStateSmall } from "@/components/ui/empty-state";
 import Link from "next/link";
 
 interface Comment {
   id: number;
   content: string;
+  authorId: string;
+  postId: number;
+  parentId: number | null;
   approved: boolean;
-  createdAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   author: {
     id: string;
     name: string;
-    image?: string;
+    image: string | null;
   };
   post: {
     id: number;
@@ -46,26 +53,6 @@ export function RecentComments() {
     loadComments();
   }, []);
 
-  const truncateText = (text: string, maxLength: number) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-
-    if (diffInHours < 1) {
-      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-      return diffInMinutes < 1 ? "Az önce" : `${diffInMinutes}dk önce`;
-    } else if (diffInHours < 24) {
-      return `${diffInHours}s önce`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays}g önce`;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -76,9 +63,7 @@ export function RecentComments() {
             Son Yorumlar
           </h3>
         </div>
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-        </div>
+        <CenterLoading size="sm" message="" />
       </div>
     );
   }
@@ -98,10 +83,10 @@ export function RecentComments() {
       </div>
 
       {comments.length === 0 ? (
-        <div className="text-center py-8">
-          <MessageSquare className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-          <p className="text-gray-500 text-sm">Henüz yorum bulunmuyor</p>
-        </div>
+        <EmptyStateSmall 
+          icon={MessageSquare}
+          message="Henüz yorum bulunmuyor"
+        />
       ) : (
         <div className="space-y-3">
           {comments.map((comment) => (
@@ -154,7 +139,7 @@ export function RecentComments() {
                   </Link>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500">
-                      {formatDate(comment.createdAt)}
+                      {formatTimeAgo(comment.createdAt)}
                     </span>
                     <Button asChild variant="ghost" size="sm" className="h-6 w-6 p-0">
                       <Link href={`/blog/${comment.post.slug}#comment-${comment.id}`}>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { formatTimeAgo, truncateText } from "@/lib/utils/date";
 import {
   Table,
   TableBody,
@@ -47,13 +48,16 @@ import Link from "next/link";
 interface Comment {
   id: number;
   content: string;
+  authorId: string;
+  postId: number;
+  parentId: number | null;
   approved: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   author: {
     id: string;
     name: string;
-    image?: string;
+    image: string | null;
   };
   post: {
     id: number;
@@ -176,20 +180,6 @@ export function CommentsManagement() {
     comment.post.title.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("tr-TR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const truncateText = (text: string, maxLength: number) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
-  };
 
   if (isLoading) {
     return (
@@ -334,7 +324,7 @@ export function CommentsManagement() {
                     </TableCell>
                     <TableCell className="py-3">
                       <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                        {formatDate(comment.createdAt)}
+                        {formatTimeAgo(comment.createdAt)}
                       </div>
                     </TableCell>
                     <TableCell className="py-3 sticky right-0 bg-background z-10">

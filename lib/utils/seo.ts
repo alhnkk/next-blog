@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { generateExcerpt } from './content-seo'
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 const siteName = 'Jurnalize'
@@ -65,7 +66,6 @@ export const generatePostMetadata = (post: {
   let description = post.excerpt
   if (!description && post.content) {
     // Eğer excerpt yoksa content'ten otomatik oluştur
-    const { generateExcerpt } = require('./content-seo')
     description = generateExcerpt(post.content, 160)
   }
   if (!description) {
@@ -227,6 +227,67 @@ export const generateTagMetadata = (tag: string, postCount?: number): Metadata =
     },
     alternates: {
       canonical: tagUrl,
+    },
+  }
+}
+
+// Arama sayfası metadata
+export const generateSearchPageMetadata = (query: string, category?: string, tag?: string): Metadata => {
+  let title = 'Arama'
+  let description = 'Jurnalize blog\'unda arama yapın.'
+  
+  if (query) {
+    title = `"${query}" Arama Sonuçları`
+    description = `"${query}" için Jurnalize blog'unda arama sonuçları.`
+    
+    if (category) {
+      description += ` ${category} kategorisinde filtre uygulandı.`
+    }
+    
+    if (tag) {
+      description += ` ${tag} etiketi ile sınırlandırıldı.`
+    }
+  }
+  
+  // Title ve description optimizasyonu
+  const optimizedTitle = optimizeTitle(title)
+  const optimizedDescription = optimizeDescription(description)
+  
+  const searchUrl = `${baseUrl}/search${query ? `?q=${encodeURIComponent(query)}` : ''}`
+
+  return {
+    title: optimizedTitle,
+    description: optimizedDescription,
+    keywords: ['arama', 'blog', 'ara', 'bul', 'Jurnalize', query].filter(Boolean) as string[],
+    robots: {
+      index: false, // Arama sayfalarını index'leme
+      follow: true,
+    },
+    openGraph: {
+      title: optimizedTitle,
+      description: optimizedDescription,
+      url: searchUrl,
+      siteName,
+      locale: 'tr_TR',
+      type: 'website',
+      images: [
+        {
+          url: `${baseUrl}/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(optimizedDescription)}`,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: optimizedTitle,
+      description: optimizedDescription,
+      creator: '@alihankck',
+      images: [`${baseUrl}/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(optimizedDescription)}`],
+    },
+    alternates: {
+      canonical: searchUrl,
     },
   }
 }

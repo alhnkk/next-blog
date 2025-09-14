@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { ButtonLoading } from "@/components/ui/loading";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -113,7 +113,7 @@ export default function LoginForm() {
             }}
           >
             {loading ? (
-              <Loader2 size={16} className="animate-spin" />
+              <ButtonLoading size="sm" />
             ) : (
               <p> Giriş Yap </p>
             )}

@@ -7,14 +7,12 @@ export default function HomePageLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-          <main>
-            <Navbar />
-            {children}
-          </main>
-          <Footer />
-      </body>
-    </html>
+    <>
+      <main>
+        <Navbar />
+        {children}
+      </main>
+      <Footer />
+    </>
   );
 }

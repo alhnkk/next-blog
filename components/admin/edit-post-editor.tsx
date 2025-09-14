@@ -12,6 +12,7 @@ import { PostStatus } from "@/lib/generated/prisma"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import RichTextEditor from "@/components/admin/text-editor"
+import { generateSlug } from "@/lib/utils/slug"
 import {
   Save,
   Send,
@@ -93,7 +94,7 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
     const loadCategories = async () => {
       try {
         const result = await getCategories()
-        if (result.success) {
+        if (result.success && result.data) {
           setCategories(result.data)
         } else {
           toast.error("Kategoriler yüklenirken hata oluştu")
@@ -118,29 +119,6 @@ export function EditPostEditor({ post }: EditPostEditorProps) {
     }
   }, [title, isSlugManuallyEdited])
 
-  const generateSlug = (text: string): string => {
-    return text
-      .toLowerCase()
-      .trim()
-      // Turkish characters to English
-      .replace(/ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/ş/g, 's')
-      .replace(/ı/g, 'i')
-      .replace(/ö/g, 'o')
-      .replace(/ç/g, 'c')
-      .replace(/Ğ/g, 'g')
-      .replace(/Ü/g, 'u')
-      .replace(/Ş/g, 's')
-      .replace(/İ/g, 'i')
-      .replace(/Ö/g, 'o')
-      .replace(/Ç/g, 'c')
-      // Remove special characters and replace spaces with hyphens
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-  }
 
   // Title değiştiğinde slug'ı otomatik güncelle (opsiyonel)
   const handleTitleChange = (newTitle: string) => {

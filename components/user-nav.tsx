@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link";
-import { LogOut, Settings, Shield, User2 } from "lucide-react";
+import { LogOut, PlusCircle, Settings, Shield, User2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -60,12 +60,20 @@ const UserNav = () => {
                            </Link>
 
                             {session.user.role === "admin" && (
+                             <>
                              <Link href="/admin">
                                    <DropdownMenuItem>
                                     <Shield className="h-[1.2rem] w-[1.2rem] mr-2" />
                                     Admin Paneli
+                                    </DropdownMenuItem>
+                                    </Link>
+                                    <Link href="/admin/posts/new">
+                                    <DropdownMenuItem>
+                                    <PlusCircle className="h-[1.2rem] w-[1.2rem] mr-2" />
+                                    Yeni Gönderi    
                                 </DropdownMenuItem>
-                             </Link>
+                                </Link>
+                             </>
                             ) }
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 

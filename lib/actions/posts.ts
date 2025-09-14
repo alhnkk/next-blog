@@ -44,6 +44,7 @@ export async function getPosts() {
         excerpt: true,
         featured: true,
         featuredImageUrl: true,
+        featuredImageAlt: true,
         status: true,
         tags: true,
         authorId: true,
@@ -92,58 +93,81 @@ export async function getPosts() {
 }
 
 // GET PUBLISHED POSTS (for public use)
-export async function getPublishedPosts() {
+export async function getPublishedPosts(page?: number, limit?: number) {
   try {
-    const posts = await prismadb.post.findMany({
-      where: {
-        status: PostStatus.PUBLISHED,
-      },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        slug: true,
-        excerpt: true,
-        featured: true,
-        featuredImageUrl: true,
-        status: true,
-        tags: true,
-        createdAt: true,
-        updatedAt: true,
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
+    const pageSize = limit || 10;
+    const skip = page ? (page - 1) * pageSize : 0;
+    
+    const [posts, totalCount] = await Promise.all([
+      prismadb.post.findMany({
+        where: {
+          status: PostStatus.PUBLISHED,
         },
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            color: true,
-          },
-        },
-        _count: {
-          select: {
-            comments: {
-              where: {
-                approved: true,
-              },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          slug: true,
+          excerpt: true,
+          featured: true,
+          featuredImageUrl: true,
+          featuredImageAlt: true,
+          status: true,
+          tags: true,
+          createdAt: true,
+          updatedAt: true,
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
             },
-            likes: true,
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              color: true,
+            },
+          },
+          _count: {
+            select: {
+              comments: {
+                where: {
+                  approved: true,
+                },
+              },
+              likes: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: skip,
+        take: pageSize,
+      }),
+      prismadb.post.count({
+        where: {
+          status: PostStatus.PUBLISHED,
+        },
+      })
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     return {
       success: true,
       data: posts,
+      pagination: {
+        page: page || 1,
+        limit: pageSize,
+        total: totalCount,
+        totalPages,
+        hasNext: page ? page < totalPages : totalCount > pageSize,
+        hasPrev: page ? page > 1 : false,
+      },
     };
   } catch (error) {
     console.error("Error fetching published posts:", error);
@@ -220,6 +244,7 @@ export async function getPostById(postId: number) {
         excerpt: true,
         featured: true,
         featuredImageUrl: true,
+        featuredImageAlt: true,
         status: true,
         tags: true,
         authorId: true,
@@ -329,6 +354,7 @@ export async function getPostBySlug(slug: string) {
         excerpt: true,
         featured: true,
         featuredImageUrl: true,
+        featuredImageAlt: true,
         status: true,
         tags: true,
         authorId: true,
@@ -1004,62 +1030,90 @@ export async function getPostsByCategory(
 // GET POSTS BY CATEGORY SLUG
 export async function getPostsByCategorySlug(
   categorySlug: string,
-  status?: PostStatus
+  status?: PostStatus,
+  page?: number,
+  limit?: number
 ) {
   try {
-    const posts = await prismadb.post.findMany({
-      where: {
-        category: {
-          slug: categorySlug,
-        },
-        ...(status && { status: status }),
-      },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        slug: true,
-        excerpt: true,
-        featured: true,
-        featuredImageUrl: true,
-        status: true,
-        tags: true,
-        createdAt: true,
-        updatedAt: true,
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
+    const pageSize = limit || 10;
+    const skip = page ? (page - 1) * pageSize : 0;
+
+    const [posts, totalCount] = await Promise.all([
+      prismadb.post.findMany({
+        where: {
+          category: {
+            slug: categorySlug,
           },
+          ...(status && { status: status }),
         },
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            color: true,
-          },
-        },
-        _count: {
-          select: {
-            comments: {
-              where: {
-                approved: true,
-              },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          slug: true,
+          excerpt: true,
+          featured: true,
+          featuredImageUrl: true,
+        featuredImageAlt: true,
+          status: true,
+          tags: true,
+          createdAt: true,
+          updatedAt: true,
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
             },
-            likes: true,
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              color: true,
+            },
+          },
+          _count: {
+            select: {
+              comments: {
+                where: {
+                  approved: true,
+                },
+              },
+              likes: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: skip,
+        take: pageSize,
+      }),
+      prismadb.post.count({
+        where: {
+          category: {
+            slug: categorySlug,
+          },
+          ...(status && { status: status }),
+        },
+      })
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     return {
       success: true,
       data: posts,
+      pagination: {
+        page: page || 1,
+        limit: pageSize,
+        total: totalCount,
+        totalPages,
+        hasNext: page ? page < totalPages : totalCount > pageSize,
+        hasPrev: page ? page > 1 : false,
+      },
     };
   } catch (error) {
     console.error("Error fetching posts by category slug:", error);
@@ -1071,54 +1125,81 @@ export async function getPostsByCategorySlug(
 }
 
 // GET POSTS BY TAG
-export async function getPostsByTag(tag: string, status?: PostStatus) {
+export async function getPostsByTag(tag: string, status?: PostStatus, page?: number, limit?: number) {
   try {
-    const posts = await prismadb.post.findMany({
-      where: {
-        tags: {
-          has: tag,
+    const pageSize = limit || 10;
+    const skip = page ? (page - 1) * pageSize : 0;
+
+    const [posts, totalCount] = await Promise.all([
+      prismadb.post.findMany({
+        where: {
+          tags: {
+            has: tag,
+          },
+          ...(status && { status: status }),
         },
-        ...(status && { status: status }),
-      },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        excerpt: true,
-        featured: true,
-        status: true,
-        tags: true,
-        createdAt: true,
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          featured: true,
+          featuredImageUrl: true,
+        featuredImageAlt: true,
+          status: true,
+          tags: true,
+          createdAt: true,
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              color: true,
+            },
+          },
+          _count: {
+            select: {
+              comments: true,
+              likes: true,
+            },
           },
         },
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            color: true,
-          },
+        orderBy: {
+          createdAt: "desc",
         },
-        _count: {
-          select: {
-            comments: true,
-            likes: true,
+        skip: skip,
+        take: pageSize,
+      }),
+      prismadb.post.count({
+        where: {
+          tags: {
+            has: tag,
           },
+          ...(status && { status: status }),
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+      })
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     return {
       success: true,
       data: posts,
+      pagination: {
+        page: page || 1,
+        limit: pageSize,
+        total: totalCount,
+        totalPages,
+        hasNext: page ? page < totalPages : totalCount > pageSize,
+        hasPrev: page ? page > 1 : false,
+      },
     };
   } catch (error) {
     console.error("Error fetching posts by tag:", error);

@@ -190,7 +190,7 @@ export const checkPagePerformance = () => {
           }
         });
         observer.observe({entryTypes: ['paint']});
-      } catch (error) {
+      } catch {
         // Performance Observer desteklenmiyor
       }
     }

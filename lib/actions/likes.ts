@@ -185,8 +185,12 @@ export async function getLikedPostsByUser(userId?: string) {
             title: true,
             slug: true,
             excerpt: true,
+            content: true,
+            status: true,
+            tags: true,
             featured: true,
             createdAt: true,
+            updatedAt: true,
             author: {
               select: {
                 id: true,

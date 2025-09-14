@@ -36,18 +36,18 @@ interface User {
   id: string;
   name: string;
   email: string;
-  emailVerified: Date | null;
+  emailVerified: boolean;
   image: string | null;
   bio: string | null;
   location: string | null;
   phone: string | null;
   createdAt: Date;
   updatedAt: Date;
-  role: string;
-  banned: boolean;
+  role: string | null;
+  banned: boolean | null;
   banReason: string | null;
   banExpires: Date | null;
-  _count: {
+  _count?: {
     posts: number;
     comments: number;
   };
@@ -55,7 +55,7 @@ interface User {
 
 interface EditUserProps {
   user: User;
-  onUserUpdate?: (updatedUser: unknown) => void;
+  onUserUpdate?: (updatedUser: Partial<User>) => void;
 }
 
 const formSchema = z.object({
@@ -90,7 +90,7 @@ const EditUser = ({ user, onUserUpdate }: EditUserProps) => {
       
       if (result.success) {
         toast.success(result.message);
-        if (onUserUpdate) {
+        if (onUserUpdate && result.data) {
           onUserUpdate(result.data);
         }
       } else {

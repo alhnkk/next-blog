@@ -33,6 +33,10 @@ const EditCategoryPage = async ({ params }: EditCategoryPageProps) => {
     );
   }
 
+  if (!result.data) {
+    notFound();
+  }
+
   return (
     <div>
       <EditCategoryEditor category={result.data} />

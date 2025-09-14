@@ -6,7 +6,10 @@ import { CommentItem } from "./comment-item";
 import { getCommentsByPostId } from "@/lib/actions/comments";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MessageSquare, Loader2, RefreshCw } from "lucide-react";
+import { normalizeCommentDates } from "@/lib/utils/date";
+import { MessageSquare, RefreshCw } from "lucide-react";
+import { CenterLoading } from "@/components/ui/loading";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface Comment {
   id: number;
@@ -52,14 +55,7 @@ export function CommentsSection({
       const result = await getCommentsByPostId(postId);
       if (result.success && result.data) {
         // Date tiplerini string'e dönüştür (recursive)
-        const formatComment = (comment: any): any => ({
-          ...comment,
-          createdAt: comment.createdAt instanceof Date ? comment.createdAt.toISOString() : comment.createdAt,
-          updatedAt: comment.updatedAt instanceof Date ? comment.updatedAt.toISOString() : comment.updatedAt,
-          replies: comment.replies?.map((reply: any) => formatComment(reply)) || []
-        });
-        
-        const formattedComments = result.data.map((comment: any) => formatComment(comment));
+        const formattedComments = result.data.map((comment: any) => normalizeCommentDates(comment));
         setComments(formattedComments);
       }
     } catch (error) {
@@ -125,12 +121,7 @@ export function CommentsSection({
 
         {/* Comments List */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-2 text-gray-500">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Yorumlar yükleniyor...</span>
-            </div>
-          </div>
+          <CenterLoading message="Yorumlar yükleniyor..." />
         ) : comments.length > 0 ? (
           <div className="space-y-8">
             {comments.map((comment) => (
@@ -144,15 +135,11 @@ export function CommentsSection({
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <MessageSquare className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h4 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
-              Henüz yorum yok
-            </h4>
-            <p className="text-gray-500 dark:text-gray-500">
-              İlk yorumu siz yapın ve tartışmayı başlatın!
-            </p>
-          </div>
+          <EmptyState
+            icon={MessageSquare}
+            title="Henüz yorum yok"
+            description="İlk yorumu siz yapın ve tartışmayı başlatın!"
+          />
         )}
       </div>
     </div>

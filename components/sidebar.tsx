@@ -103,9 +103,9 @@ const Sidebar = ({ categories, popularTags = [], selectedCategory, selectedTag }
       <div className="mt-4 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-2">
         {/* Kategoriler */}
         {categories.map((category) => {
-          const IconComponent = category.icon
+          const IconComponent = (category.icon
             ? iconMap[category.icon.toLowerCase()] || Hash
-            : Hash;
+            : Hash) as React.ComponentType<{className?: string; style?: React.CSSProperties}>;
           const isSelected = selectedCategory === category.slug;
 
           return (

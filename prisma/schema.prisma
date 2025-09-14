@@ -36,6 +36,13 @@ model Post {
   comments   Comment[]
   likes      Like[]
   
+  // Performance indexes
+  @@index([status, createdAt(sort: Desc)], name: "idx_post_status_created")
+  @@index([categoryId, status, createdAt(sort: Desc)], name: "idx_post_category_status_created") 
+  @@index([authorId, status, createdAt(sort: Desc)], name: "idx_post_author_status_created")
+  @@index([featured, status, createdAt(sort: Desc)], name: "idx_post_featured_status_created")
+  @@index([tags], name: "idx_post_tags")
+  @@index([createdAt(sort: Desc)], name: "idx_post_created_desc")
   @@map("post")
 }
 
@@ -72,6 +79,10 @@ model Comment {
   replies   Comment[] @relation("CommentReplies")
   likes     CommentLike[]
   
+  // Performance indexes
+  @@index([postId, approved, createdAt(sort: Desc)], name: "idx_comment_post_approved_created")
+  @@index([authorId, createdAt(sort: Desc)], name: "idx_comment_author_created")
+  @@index([parentId], name: "idx_comment_parent")
   @@map("comment")
 }
 
@@ -86,6 +97,8 @@ model Like {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   
   @@unique([userId, postId])
+  @@index([postId, createdAt(sort: Desc)], name: "idx_like_post_created")
+  @@index([userId, createdAt(sort: Desc)], name: "idx_like_user_created")
   @@map("like")
 }
 

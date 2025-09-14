@@ -33,6 +33,10 @@ const EditPostPage = async ({ params }: EditPostPageProps) => {
     );
   }
 
+  if (!result.data) {
+    notFound();
+  }
+
   return (
     <div>
       <EditPostEditor post={result.data} />
