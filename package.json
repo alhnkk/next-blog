@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "build:local": "next build",
     "start": "next start",
     "lint": "next lint",
     "analyze": "ANALYZE=true npm run build",
-    "build:analyze": "cross-env ANALYZE=true npm run build"
+    "build:analyze": "cross-env ANALYZE=true npm run build",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

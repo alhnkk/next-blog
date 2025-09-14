@@ -1,0 +1,15 @@
+{
+  "buildCommand": "prisma generate && npm run build",
+  "installCommand": "npm install && prisma generate",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "app/**/*.tsx": {
+      "maxDuration": 30
+    },
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "crons": []
+}
