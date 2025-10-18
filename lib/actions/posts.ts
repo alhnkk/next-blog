@@ -1209,3 +1209,87 @@ export async function getPostsByTag(tag: string, status?: PostStatus, page?: num
     };
   }
 }
+
+export async function getPublishedPostsMinimal(page?: number, limit?: number) {
+  try {
+    const pageSize = limit || 10;
+    const skip = page ? (page - 1) * pageSize : 0;
+
+    const [posts, totalCount] = await Promise.all([
+      prismadb.post.findMany({
+        where: {
+          status: PostStatus.PUBLISHED,
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          featured: true,
+          featuredImageUrl: true,
+          featuredImageAlt: true,
+          status: true,
+          tags: true,
+          createdAt: true,
+          updatedAt: true,
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              color: true,
+            },
+          },
+          _count: {
+            select: {
+              comments: {
+                where: {
+                  approved: true,
+                },
+              },
+              likes: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: skip,
+        take: pageSize,
+      }),
+      prismadb.post.count({
+        where: {
+          status: PostStatus.PUBLISHED,
+        },
+      })
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      success: true,
+      data: posts,
+      pagination: {
+        page: page || 1,
+        limit: pageSize,
+        total: totalCount,
+        totalPages,
+        hasNext: page ? page < totalPages : totalCount > pageSize,
+        hasPrev: page ? page > 1 : false,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching published posts:", error);
+    return {
+      success: false,
+      error: "Yayınlanan gönderiler getirilirken hata oluştu",
+    };
+  }
+}

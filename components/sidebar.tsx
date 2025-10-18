@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   BrainCog,
@@ -9,6 +9,7 @@ import {
   SquareActivity,
   Hash,
 } from "lucide-react";
+import { memo } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,6 @@ interface SidebarProps {
   selectedTag?: string;
 }
 
-// Icon mapping for categories
 const iconMap: { [key: string]: unknown } = {
   pen: Pen,
   clapperboard: Clapperboard,
@@ -58,32 +58,24 @@ const Sidebar = ({ categories, popularTags = [], selectedCategory, selectedTag }
 
   const handleCategoryClick = (categorySlug: string) => {
     const params = new URLSearchParams(searchParams);
-
     if (selectedCategory === categorySlug) {
-      // Aynı kategoriye tıklanırsa filtreyi kaldır
       params.delete("category");
     } else {
-      // Yeni kategori seç ve tag filtresini temizle
       params.set("category", categorySlug);
       params.delete("tag");
     }
-
     const queryString = params.toString();
     router.push(queryString ? `/?${queryString}` : "/");
   };
 
   const handleTagClick = (tagName: string) => {
     const params = new URLSearchParams(searchParams);
-
     if (selectedTag === tagName) {
-      // Aynı tag'e tıklanırsa filtreyi kaldır
       params.delete("tag");
     } else {
-      // Yeni tag seç ve kategori filtresini temizle
       params.set("tag", tagName);
       params.delete("category");
     }
-
     const queryString = params.toString();
     router.push(queryString ? `/?${queryString}` : "/");
   };
@@ -101,7 +93,6 @@ const Sidebar = ({ categories, popularTags = [], selectedCategory, selectedTag }
     <div className="ml-16">
       <h3 className="text-3xl font-bold tracking-tight">Kategoriler</h3>
       <div className="mt-4 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-2">
-        {/* Kategoriler */}
         {categories.map((category) => {
           const IconComponent = (category.icon
             ? iconMap[category.icon.toLowerCase()] || Hash
@@ -113,24 +104,15 @@ const Sidebar = ({ categories, popularTags = [], selectedCategory, selectedTag }
               key={category.id}
               onClick={() => handleCategoryClick(category.slug)}
               className={cn(
-                "flex items-center justify-between gap-2 p-3 rounded-md cursor-pointer hover:bg-muted/80 transition-colors",
-                isSelected && "ring-2 ring-primary",
-                category.color
-                  ? `bg-[${category.color}]/10 hover:bg-[${category.color}]/20`
-                  : "bg-muted"
+                "flex items-center justify-between gap-2 p-3 rounded-md cursor-pointer hover:bg-muted/80 transition-colors bg-muted",
+                isSelected && "ring-2 ring-primary"
               )}
-              style={{
-                backgroundColor: category.color
-                  ? `${category.color}15`
-                  : undefined,
-              }}
+              style={category.color ? { backgroundColor: `${category.color}15` } : undefined}
             >
               <div className="flex items-center gap-3">
                 <IconComponent
                   className="h-5 w-5"
-                  style={{
-                    color: category.color || undefined,
-                  }}
+                  style={category.color ? { color: category.color } : undefined}
                 />
                 <span className="font-medium">{category.name}</span>
               </div>
@@ -142,14 +124,12 @@ const Sidebar = ({ categories, popularTags = [], selectedCategory, selectedTag }
         })}
       </div>
       
-      {/* Popüler Etiketler */}
       {popularTags.length > 0 && (
         <div className="mt-8">
           <h3 className="text-2xl font-bold tracking-tight mb-4">Popüler Etiketler</h3>
           <div className="flex flex-wrap gap-2">
             {popularTags.map((tag) => {
               const isSelected = selectedTag === tag.name;
-              
               return (
                 <div
                   key={tag.name}
@@ -178,4 +158,4 @@ const Sidebar = ({ categories, popularTags = [], selectedCategory, selectedTag }
   );
 };
 
-export default Sidebar;
+export default memo(Sidebar);

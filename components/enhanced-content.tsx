@@ -38,46 +38,25 @@ export function EnhancedContent({
   className = ""
 }: EnhancedContentProps) {
   const [enhancedContent, setEnhancedContent] = useState(content);
-  const [isEnhancing, setIsEnhancing] = useState(false);
 
   useEffect(() => {
-    // İç link enhancement'i asenkron olarak yap
-    const enhance = async () => {
-      setIsEnhancing(true);
-      
-      // Performans için biraz bekle
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      try {
-        const enhanced = enhanceContentWithInternalLinks(
-          content,
-          categories,
-          popularTags,
-          relatedPosts,
-          currentPostId
-        );
-        setEnhancedContent(enhanced);
-      } catch (error) {
-        console.error("İç link enhancement hatası:", error);
-        setEnhancedContent(content); // Fallback to original content
-      } finally {
-        setIsEnhancing(false);
-      }
-    };
-
-    enhance();
+    try {
+      const enhanced = enhanceContentWithInternalLinks(
+        content,
+        categories,
+        popularTags,
+        relatedPosts,
+        currentPostId
+      );
+      setEnhancedContent(enhanced);
+    } catch (error) {
+      console.error("İç link enhancement hatası:", error);
+      setEnhancedContent(content);
+    }
   }, [content, categories, popularTags, relatedPosts, currentPostId]);
 
   return (
     <div className={`relative ${className}`}>
-      {isEnhancing && (
-        <div className="absolute top-0 right-0 z-10">
-          <div className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded">
-            İç linkler ekleniyor...
-          </div>
-        </div>
-      )}
-      
       <div 
         className="leading-relaxed text-base"
         dangerouslySetInnerHTML={{ __html: enhancedContent }}
@@ -93,7 +72,7 @@ export function EnhancedContent({
         }
         
         .internal-link:after {
-          content: "↗";
+          content: "";
           font-size: 0.75em;
           margin-left: 2px;
           opacity: 0.6;

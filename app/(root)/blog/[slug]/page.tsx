@@ -21,7 +21,7 @@ import { generateBreadcrumbSchema } from "@/lib/utils/structured-data";
 import { Breadcrumb } from "@/components/seo/breadcrumb";
 import { RelatedPosts } from "@/components/related-posts";
 import { findRelatedPosts } from "@/lib/utils/related-posts";
-import { getPublishedPosts } from "@/lib/actions/posts";
+import { getPublishedPostsMinimal } from "@/lib/actions/posts";
 import { EnhancedContent } from "@/components/enhanced-content";
 import { getCategories } from "@/lib/actions/categories";
 import { getPopularTags } from "@/lib/actions/tags";
@@ -137,7 +137,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
 
   // İlgili postları ve diğer verileri getir
   const [allPostsResult, categoriesResult, popularTagsResult] = await Promise.all([
-    getPublishedPosts(),
+    getPublishedPostsMinimal(),
     getCategories(),
     getPopularTags(10)
   ]);
