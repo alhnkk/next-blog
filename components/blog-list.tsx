@@ -70,7 +70,7 @@ const BlogList = ({ posts, currentUser }: BlogListProps) => {
               src={post.featuredImageUrl || "/placeholder2.jpeg"}
               alt={post.featuredImageAlt || post.title}
               width={400}
-              height={302}
+              height={256}
               className="w-full h-[256px] object-cover"
               loading="lazy"
               placeholder="blur"

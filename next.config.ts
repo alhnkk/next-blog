@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
+﻿import type { NextConfig } from "next";
 
-// Güvenlik başlıkları
 const securityHeaders = [
   {
     key: 'X-DNS-Prefetch-Control',
@@ -32,99 +31,40 @@ const securityHeaders = [
   },
   {
     key: 'Content-Security-Policy',
-    value: `
-      default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' *.googletagmanager.com *.google.com *.gstatic.com;
-      style-src 'self' 'unsafe-inline' fonts.googleapis.com;
-      img-src 'self' data: blob: *.imagekit.io *.googleusercontent.com *.google.com images.pexels.com;
-      font-src 'self' fonts.googleapis.com fonts.gstatic.com;
-      connect-src 'self' *.google-analytics.com *.googletagmanager.com *.supabase.com *.supabase.co *.imagekit.io upload.imagekit.io;
-      media-src 'self' *.imagekit.io;
-      object-src 'none';
-      base-uri 'self';
-      form-action 'self';
-      frame-ancestors 'self';
-      upgrade-insecure-requests;
-    `.replace(/\s{2,}/g, ' ').trim()
+    value: `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' *.googletagmanager.com *.google.com *.gstatic.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; img-src 'self' data: blob: *.imagekit.io *.googleusercontent.com *.google.com images.pexels.com; font-src 'self' fonts.googleapis.com fonts.gstatic.com; connect-src 'self' *.google-analytics.com *.googletagmanager.com *.supabase.com *.supabase.co *.imagekit.io upload.imagekit.io; media-src 'self' *.imagekit.io; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;`.replace(/\s{2,}/g, ' ').trim()
   }
 ];
 
 const nextConfig: NextConfig = {
-  /* config options here */
   poweredByHeader: false,
   compress: true,
   
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.pexels.com",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "ik.imagekit.io",
-      },
+      { protocol: "https", hostname: "images.pexels.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "ik.imagekit.io" },
     ],
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 31536000, // 1 yıl
+    minimumCacheTTL: 31536000,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
   async headers() {
     return [
-      {
-        source: '/(.*)',
-        headers: securityHeaders,
-      },
-      {
-        source: '/api/(.*)',
-        headers: [
-          ...securityHeaders,
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate'
-          }
-        ],
-      },
-      {
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ],
-      },
-      {
-        source: '/robots.txt',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600'
-          }
-        ],
-      },
-      {
-        source: '/rss.xml',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600'
-          },
-          {
-            key: 'Content-Type',
-            value: 'application/rss+xml'
-          }
-        ],
-      }
+      { source: '/(.*)', headers: securityHeaders },
+      { source: '/api/(.*)', headers: [...securityHeaders, { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }] },
+      { source: '/_next/static/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
+      { source: '/public/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
+      { source: '/robots.txt', headers: [{ key: 'Cache-Control', value: 'public, max-age=3600' }] },
+      { source: '/rss.xml', headers: [{ key: 'Cache-Control', value: 'public, max-age=3600' }, { key: 'Content-Type', value: 'application/rss+xml' }] }
     ];
   },
 
   experimental: {
     scrollRestoration: true,
+    optimizePackageImports: ['lucide-react'],
   },
 };
 
