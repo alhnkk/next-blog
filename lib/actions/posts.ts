@@ -92,7 +92,7 @@ export async function getPosts() {
   }
 }
 
-// GET PUBLISHED POSTS (for public use)
+// GET PUBLISHED POSTS (for public use) - OPTIMIZED
 export async function getPublishedPosts(page?: number, limit?: number) {
   try {
     const pageSize = limit || 10;
@@ -106,7 +106,6 @@ export async function getPublishedPosts(page?: number, limit?: number) {
         select: {
           id: true,
           title: true,
-          content: true,
           slug: true,
           excerpt: true,
           featured: true,
@@ -378,47 +377,6 @@ export async function getPostBySlug(slug: string) {
             description: true,
             color: true,
             icon: true,
-          },
-        },
-        comments: {
-          where: {
-            approved: true,
-            parentId: null,
-          },
-          select: {
-            id: true,
-            content: true,
-            createdAt: true,
-            author: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-            replies: {
-              where: {
-                approved: true,
-              },
-              select: {
-                id: true,
-                content: true,
-                createdAt: true,
-                author: {
-                  select: {
-                    id: true,
-                    name: true,
-                    image: true,
-                  },
-                },
-              },
-              orderBy: {
-                createdAt: "asc",
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
           },
         },
         _count: {
@@ -1290,6 +1248,61 @@ export async function getPublishedPostsMinimal(page?: number, limit?: number) {
     return {
       success: false,
       error: "Yayınlanan gönderiler getirilirken hata oluştu",
+    };
+  }
+}
+
+// GET PUBLISHED POSTS FOR RSS FEED (with content)
+export async function getPublishedPostsForRSS() {
+  try {
+    const posts = await prismadb.post.findMany({
+      where: {
+        status: PostStatus.PUBLISHED,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        slug: true,
+        excerpt: true,
+        featured: true,
+        featuredImageUrl: true,
+        featuredImageAlt: true,
+        status: true,
+        tags: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 100, // RSS için son 100 post
+    });
+
+    return {
+      success: true,
+      data: posts,
+    };
+  } catch (error) {
+    console.error("Error fetching published posts for RSS:", error);
+    return {
+      success: false,
+      error: "RSS feed gönderileri getirilirken hata oluştu",
     };
   }
 }

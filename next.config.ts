@@ -39,6 +39,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   
+  // Enable ISR (Incremental Static Regeneration) for better performance
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 5,
+  },
+  
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.pexels.com" },
@@ -47,8 +53,11 @@ const nextConfig: NextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 31536000,
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Optimize device sizes
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Enable AVIF support first
+    dangerouslyAllowSVG: false,
   },
 
   async headers() {
@@ -58,13 +67,15 @@ const nextConfig: NextConfig = {
       { source: '/_next/static/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
       { source: '/public/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
       { source: '/robots.txt', headers: [{ key: 'Cache-Control', value: 'public, max-age=3600' }] },
-      { source: '/rss.xml', headers: [{ key: 'Cache-Control', value: 'public, max-age=3600' }, { key: 'Content-Type', value: 'application/rss+xml' }] }
+      { source: '/rss.xml', headers: [{ key: 'Cache-Control', value: 'public, max-age=3600' }, { key: 'Content-Type', value: 'application/rss+xml' }] },
+      // ISR headers for blog posts
+      { source: '/blog/:slug', headers: [{ key: 'Cache-Control', value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800' }] },
     ];
   },
 
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
 };
 

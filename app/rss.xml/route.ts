@@ -1,9 +1,9 @@
-import { getPublishedPosts } from "@/lib/actions/posts";
+import { getPublishedPostsForRSS } from "@/lib/actions/posts";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const postsResult = await getPublishedPosts();
+    const postsResult = await getPublishedPostsForRSS();
     
     if (!postsResult.success || !postsResult.data) {
       return new NextResponse("Feed alınamadı", { status: 500 });

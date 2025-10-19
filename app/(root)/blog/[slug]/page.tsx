@@ -1,5 +1,4 @@
 import { getPostBySlug } from "@/lib/actions/posts";
-import { getCommentsByPostId } from "@/lib/actions/comments";
 import { auth } from "@/lib/auth";
 import { LikeButton } from "@/components/like-button";
 import {
@@ -16,16 +15,18 @@ import { ShareButton } from "@/components/share-button";
 import { generateArticleSchema } from "@/lib/utils/structured-data";
 import { StructuredData } from "@/components/seo/structured-data";
 import { generatePostMetadata } from "@/lib/utils/seo";
-import { calculateReadingTime, getWordCount, generateExcerpt } from "@/lib/utils/content-seo";
+import { calculateReadingTime, getWordCount } from "@/lib/utils/content-seo";
 import { generateBreadcrumbSchema } from "@/lib/utils/structured-data";
 import { Breadcrumb } from "@/components/seo/breadcrumb";
 import { RelatedPosts } from "@/components/related-posts";
 import { findRelatedPosts } from "@/lib/utils/related-posts";
 import { getPublishedPosts } from "@/lib/actions/posts";
 import { EnhancedContent } from "@/components/enhanced-content";
-import { getCategories } from "@/lib/actions/categories";
-import { getPopularTags } from "@/lib/actions/tags";
 import type { Metadata } from "next";
+
+// ISR ayarları - her 1 saat başında revalidate et
+export const revalidate = 3600; // 1 saat
+export const dynamic = 'force-static';
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -104,10 +105,6 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
 
   const post = postResult.data;
   
-  // Yorumları yükle
-  const commentsResult = await getCommentsByPostId(post.id);
-  const comments = commentsResult.success ? commentsResult.data : [];
-
   // Session bilgisini al - basit yaklaşım
   let currentUser = null;
   try {
@@ -135,16 +132,10 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
   const readingTime = calculateReadingTime(post.content || '');
   const wordCount = getWordCount(post.content || '');
 
-  // İlgili postları ve diğer verileri getir
-  const [allPostsResult, categoriesResult, popularTagsResult] = await Promise.all([
-    getPublishedPosts(),
-    getCategories(),
-    getPopularTags(10)
-  ]);
+  // İlgili postları getir - sadece gerekli alanlar
+  const allPostsResult = await getPublishedPosts(1, 50); // max 50 için related posts
   
   const allPosts = allPostsResult.success ? allPostsResult.data || [] : [];
-  const categories = categoriesResult.success ? categoriesResult.data || [] : [];
-  const popularTags = popularTagsResult.success ? popularTagsResult.data || [] : [];
   
   // Post tipini related-posts utility'sine uygun hale getir
   const postForRelated = {
@@ -303,7 +294,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
               />
               <Button variant="ghost" className="flex items-center gap-1">
                 <MessageSquare className="h-4 w-4" />
-                <span className="text-sm">{post.comments?.length || 0}</span>
+                <span className="text-sm">0</span>
               </Button>
               <ShareButton title={post.title} />
             </div>
@@ -318,9 +309,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
           {post.content ? (
             <EnhancedContent
               content={post.content}
-              categories={categories}
-              popularTags={popularTags}
-              relatedPosts={relatedPostsForComponent.filter(p => p !== null).slice(0, 3)} // Sadece ilk 3'ü
+              relatedPosts={relatedPostsForComponent.filter(p => p !== null).slice(0, 3)}
               currentPostId={Number(post.id)}
             />
           ) : (
