@@ -78,19 +78,31 @@ export default function RootLayout({
     <html lang="tr" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        {/* Critical resources preload */}
         <link rel="preload" href="/logo.jpeg" as="image" type="image/jpeg" />
+        <link rel="preload" as="font" href="https://fonts.gstatic.com/s/poppins/v21/pxiGyqoqzDjrCCAZChSkeGdeQC3rK4MlIZfcDMVvN1UBxn60xkUt.0.woff2" crossOrigin="anonymous" />
+        
+        {/* DNS prefetch and preconnect for external resources */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="//ik.imagekit.io" />
         <link rel="preconnect" href="https://ik.imagekit.io" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+        
+        {/* RSS feed */}
         <link rel="alternate" type="application/rss+xml" title="Jurnalize Blog RSS Feed" href="/rss.xml" />
+        
+        {/* Theme colors */}
         <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         
-        {/* Google Analytics 4 */}
+        {/* Google Analytics 4 - Lazy loaded */}
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
             <script
               async
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+              strategy="afterInteractive"
             />
             <script
               dangerouslySetInnerHTML={{
@@ -105,6 +117,7 @@ export default function RootLayout({
                   });
                 `,
               }}
+              strategy="afterInteractive"
             />
           </>
         )}

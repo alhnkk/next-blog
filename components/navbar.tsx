@@ -15,6 +15,7 @@ const Navbar = async () => {
           <Link 
             href="/" 
             className="flex items-center gap-3 group hover:opacity-80 transition-opacity duration-200"
+            prefetch={true}
           >
             <div className="relative flex-shrink-0">
               <Image
@@ -36,6 +37,7 @@ const Navbar = async () => {
             <Link 
               href="/" 
               className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors duration-200 group"
+              prefetch={true}
             >
               <Home className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               <span>Ana Sayfa</span>
@@ -44,6 +46,7 @@ const Navbar = async () => {
             <Link 
               href="/contact" 
               className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors duration-200 group"
+              prefetch={true}
             >
               <Mail className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               <span>İletişim</span>

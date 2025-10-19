@@ -45,6 +45,9 @@ const nextConfig: NextConfig = {
     pagesBufferLength: 5,
   },
   
+  // Optimize dynamic imports
+  staticPageGenerationTimeout: 60,
+  
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.pexels.com" },
