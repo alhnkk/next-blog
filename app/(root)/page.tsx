@@ -88,7 +88,7 @@ const BlogPage = async ({
   const posts = postsResult.success ? postsResult.data || [] : [];
   const pagination = postsResult.success ? postsResult.pagination : null;
   const categories = categoriesResult.success ? categoriesResult.data || [] : [];
-  const popularTags = popularTagsResult.success ? popularTagsResult.data || [] : [];
+  const popularTags: Array<{ name: string; count: number }> = popularTagsResult.success ? popularTagsResult.data || [] : [];
 
   const selectedCategoryName = resolvedSearchParams.category
     ? categories.find((cat) => cat.slug === resolvedSearchParams.category)?.name
