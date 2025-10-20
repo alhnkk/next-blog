@@ -43,6 +43,14 @@ export function CommentsSection({
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [user, setUser] = useState(currentUser);
+
+  useEffect(() => {
+    // Server'dan gelen user bilgisini güncelle
+    if (currentUser) {
+      setUser(currentUser);
+    }
+  }, [currentUser]);
 
   const loadComments = async (showLoader = true) => {
     if (showLoader) {
@@ -113,7 +121,7 @@ export function CommentsSection({
         {/* Comment Form */}
         <CommentForm
           postId={postId}
-          user={currentUser}
+          user={user}
           onSuccess={handleCommentUpdate}
         />
 
@@ -129,7 +137,7 @@ export function CommentsSection({
                 key={comment.id}
                 comment={comment}
                 postId={postId}
-                currentUser={currentUser}
+                currentUser={user}
                 onUpdate={handleCommentUpdate}
               />
             ))}

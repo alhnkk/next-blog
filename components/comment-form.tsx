@@ -91,6 +91,7 @@ export function CommentForm({
           onSuccess?.();
         }, 300);
       } else {
+        console.error("Comment error:", result);
         toast({
           title: "Hata",
           description: result.error,
@@ -98,6 +99,7 @@ export function CommentForm({
         });
       }
     } catch (error) {
+      console.error("Comment submission error:", error);
       toast({
         title: "Hata",
         description: "Yorum gönderilirken bir hata oluştu",

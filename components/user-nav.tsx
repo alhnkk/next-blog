@@ -98,7 +98,7 @@ const UserNav = () => {
                 (
                     <div className="flex items-center gap-x-3">
                         <Link href="/login">
-                            <Button variant="outline">Giriş Yap</Button>
+                            <Button variant="secondary">Giriş Yap</Button>  
                         </Link>
                     </div>
                 )

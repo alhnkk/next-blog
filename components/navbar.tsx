@@ -8,7 +8,7 @@ import UserNav from "./user-nav";
 const Navbar = async () => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between h-16">
           
           {/* Logo & Brand */}
@@ -31,7 +31,11 @@ const Navbar = async () => {
             </div>
           </Link>
 
-          {/* Navigation Links */}
+         
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-4">
+             {/* Navigation Links */}
           <nav className="hidden sm:flex items-center gap-8">
             <Link 
               href="/" 
@@ -49,9 +53,6 @@ const Navbar = async () => {
               <span>İletişim</span>
             </Link>
           </nav>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-4">
             <ThemeToggle />
             <UserNav />
           </div>

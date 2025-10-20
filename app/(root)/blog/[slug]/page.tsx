@@ -26,7 +26,6 @@ import type { Metadata } from "next";
 
 // ISR ayarları - her 1 saat başında revalidate et
 export const revalidate = 3600; // 1 saat
-export const dynamic = 'force-static';
 
 interface BlogPostPageProps {
   params: Promise<{
