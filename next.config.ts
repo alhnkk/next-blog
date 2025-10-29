@@ -77,6 +77,17 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: '/(.*)', headers: securityHeaders },
+      // ✅ OPTIMIZED: Auth API headers - allow credentials and proper CORS
+      { 
+        source: '/api/auth/(.*)', 
+        headers: [
+          { key: 'Content-Type', value: 'application/json' },
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, Cookie' },
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
+        ] 
+      },
       { 
         source: '/api/(.*)', 
         headers: [

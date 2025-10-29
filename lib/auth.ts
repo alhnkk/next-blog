@@ -8,6 +8,12 @@ export const auth = betterAuth({
     database: prismaAdapter(prismadb, {
         provider: "postgresql",
     }),
+    // ✅ OPTIMIZED: Trust host ve base URL ayarı
+    baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    basePath: "/api/auth",
+    trustHost: true,
+    secret: process.env.BETTER_AUTH_SECRET || process.env.AUTH_SECRET || "your-secret-key",
+    
     emailAndPassword: {
         enabled: true,
         async sendResetPassword(data, request) {
