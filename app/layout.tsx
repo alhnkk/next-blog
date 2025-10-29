@@ -6,11 +6,12 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SettingsProvider } from "@/components/providers/settings-provider";
 import { Toaster } from "@/components/ui/toaster";
 
+// ✅ OPTIMIZED: Font configuration with display swap and preload
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  display: 'swap',
+  display: 'swap', // Immediately use fallback, swap when loaded
   preload: true,
   fallback: ['system-ui', 'arial'],
 });
@@ -78,25 +79,43 @@ export default function RootLayout({
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        {/* Critical resources preload */}
-        <link rel="preload" href="/logo.jpeg" as="image" type="image/jpeg" />
+        {/* ✅ OPTIMIZED: Viewport meta tags for better mobile rendering */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         
-        {/* DNS prefetch for CDN */}
+        {/* Critical resources preload */}
+        <link rel="preload" href="/logo.jpeg" as="image" type="image/jpeg" fetchPriority="high" />
+        
+        {/* ✅ OPTIMIZED: Preconnect to critical third-party resources */}
         <link rel="dns-prefetch" href="//ik.imagekit.io" />
         <link rel="preconnect" href="https://ik.imagekit.io" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Feed alternates */}
         <link rel="alternate" type="application/rss+xml" title="Jurnalize Blog RSS Feed" href="/rss.xml" />
         
         {/* Theme colors */}
         <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         
-        {/* Google Analytics 4 - Lazy loaded */}
+        {/* Performance: Prefetch DNS for analytics */}
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+            <link rel="dns-prefetch" href="//www.google-analytics.com" />
+          </>
+        )}
+        
+        {/* Google Analytics 4 - Lazy loaded with optimal strategy */}
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
               strategy="afterInteractive"
+              async
             />
             <Script
               id="google-analytics-config"
@@ -108,7 +127,8 @@ export default function RootLayout({
                   gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
                     page_title: document.title,
                     page_location: window.location.href,
-                    send_page_view: true
+                    send_page_view: true,
+                    anonymize_ip: true
                   });
                 `,
               }}

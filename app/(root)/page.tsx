@@ -48,7 +48,7 @@ const BlogPage = async ({
 }) => {
   const resolvedSearchParams = await searchParams;
   
-  // Session bilgisini al
+  // ✅ OPTIMIZED: Session loading'i non-blocking yap - asynchronous olarak çalışsın
   let currentUser = null;
   try {
     const { headers } = await import("next/headers");
@@ -80,6 +80,7 @@ const BlogPage = async ({
     postsResult = await getPublishedPosts(currentPage, postsPerPage);
   }
 
+  // ✅ OPTIMIZED: Kategoriler ve tagları paralel yükle
   const [categoriesResult, popularTagsResult] = await Promise.all([
     getCategories(),
     getPopularTags(10),

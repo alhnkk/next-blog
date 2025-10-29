@@ -1306,3 +1306,121 @@ export async function getPublishedPostsForRSS() {
     };
   }
 }
+
+// OPTIMIZED: GET RELATED POSTS BY CATEGORY AND TAGS
+// ✅ Tarafından bu fonksiyon: Tüm yazıları yüklemek yerine DB'de filtre yapmak
+export async function getRelatedPostsForSlug(
+  postId: number,
+  categoryId: number | null | undefined,
+  tags: string[] = [],
+  limit: number = 3
+) {
+  try {
+    // Eğer kategori veya tag yoksa, son gönderileri al
+    if (!categoryId && tags.length === 0) {
+      const posts = await prismadb.post.findMany({
+        where: {
+          status: PostStatus.PUBLISHED,
+          id: {
+            not: postId, // Kendisini hariç tut
+          },
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          featuredImageUrl: true,
+          featuredImageAlt: true,
+          tags: true,
+          createdAt: true,
+          author: {
+            select: {
+              name: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: limit,
+      });
+
+      return {
+        success: true,
+        data: posts,
+      };
+    }
+
+    // İlgili yazıları kategori VE taglar ile bul
+    const relatedPosts = await prismadb.post.findMany({
+      where: {
+        AND: [
+          { status: PostStatus.PUBLISHED },
+          { id: { not: postId } },
+          {
+            OR: [
+              // Aynı kategorideki yazılar
+              ...(categoryId ? [{ categoryId: categoryId }] : []),
+              // Tag'ı olan yazılar
+              ...(tags.length > 0
+                ? [
+                    {
+                      tags: {
+                        hasSome: tags,
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        featuredImageUrl: true,
+        featuredImageAlt: true,
+        tags: true,
+        createdAt: true,
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+    });
+
+    return {
+      success: true,
+      data: relatedPosts,
+    };
+  } catch (error) {
+    console.error("Error fetching related posts:", error);
+    return {
+      success: false,
+      error: "İlgili gönderiler getirilirken hata oluştu",
+      data: [],
+    };
+  }
+}

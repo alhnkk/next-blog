@@ -1,4 +1,4 @@
-import { getPostBySlug } from "@/lib/actions/posts";
+import { getPostBySlug, getRelatedPostsForSlug } from "@/lib/actions/posts";
 import { auth } from "@/lib/auth";
 import { LikeButton } from "@/components/like-button";
 import {
@@ -19,8 +19,6 @@ import { calculateReadingTime, getWordCount } from "@/lib/utils/content-seo";
 import { generateBreadcrumbSchema } from "@/lib/utils/structured-data";
 import { Breadcrumb } from "@/components/seo/breadcrumb";
 import { RelatedPosts } from "@/components/related-posts";
-import { findRelatedPosts } from "@/lib/utils/related-posts";
-import { getPublishedPosts } from "@/lib/actions/posts";
 import { EnhancedContent } from "@/components/enhanced-content";
 import type { Metadata } from "next";
 
@@ -131,58 +129,30 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
   const readingTime = calculateReadingTime(post.content || '');
   const wordCount = getWordCount(post.content || '');
 
-  // İlgili postları getir - sadece gerekli alanlar
-  const allPostsResult = await getPublishedPosts(1, 50); // max 50 için related posts
+  // ✅ OPTIMIZED: İlgili yazıları getir - kategori ve tag bazlı filtre
+  const relatedPostsResult = await getRelatedPostsForSlug(
+    Number(post.id),
+    post.category?.id,
+    post.tags || [],
+    3
+  );
   
-  const allPosts = allPostsResult.success ? allPostsResult.data || [] : [];
-  
-  // Post tipini related-posts utility'sine uygun hale getir
-  const postForRelated = {
-    id: Number(post.id),
-    title: post.title,
-    slug: post.slug,
-    excerpt: post.excerpt,
-    tags: post.tags || [],
-    categoryId: post.category?.id || null,
-    createdAt: new Date(post.createdAt),
-    author: {
-      name: post.author.name
-    }
-  };
-  
-  const allPostsForRelated = allPosts.map(p => ({
-    id: Number(p.id),
-    title: p.title,
-    slug: p.slug,
-    excerpt: p.excerpt,
-    tags: p.tags || [],
-    categoryId: p.category?.id || null,
-    createdAt: new Date(p.createdAt),
-    author: {
-      name: p.author.name
-    }
-  }));
-  
-  const relatedPosts = findRelatedPosts(postForRelated, allPostsForRelated, 3);
-  
-  // İlgili postları original format'a çevir
-  const relatedPostsForComponent = relatedPosts.map(rp => {
-    const originalPost = allPosts.find(p => Number(p.id) === rp.id);
-    return originalPost ? {
-      id: Number(originalPost.id),
-      title: originalPost.title,
-      slug: originalPost.slug,
-      excerpt: originalPost.excerpt,
-      featuredImageUrl: originalPost.featuredImageUrl,
-      featuredImageAlt: originalPost.featuredImageAlt,
-      tags: originalPost.tags || [],
-      createdAt: new Date(originalPost.createdAt),
-      author: {
-        name: originalPost.author.name
-      },
-      category: originalPost.category
-    } : null;
-  }).filter(Boolean);
+  const relatedPostsForComponent = relatedPostsResult.success 
+    ? (relatedPostsResult.data || []).map(rp => ({
+        id: rp.id,
+        title: rp.title,
+        slug: rp.slug,
+        excerpt: rp.excerpt,
+        featuredImageUrl: rp.featuredImageUrl,
+        featuredImageAlt: rp.featuredImageAlt,
+        tags: rp.tags || [],
+        createdAt: new Date(rp.createdAt),
+        author: {
+          name: rp.author.name
+        },
+        category: rp.category
+      }))
+    : [];
 
   // Breadcrumb schema oluştur
   const breadcrumbItems = [
@@ -308,7 +278,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
           {post.content ? (
             <EnhancedContent
               content={post.content}
-              relatedPosts={relatedPostsForComponent.filter(p => p !== null).slice(0, 3)}
+              relatedPosts={relatedPostsForComponent.slice(0, 3)}
               currentPostId={Number(post.id)}
             />
           ) : (
@@ -362,7 +332,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
 
         {/* Related Posts */}
         <RelatedPosts 
-          posts={relatedPostsForComponent.filter(p => p !== null)}
+          posts={relatedPostsForComponent}
           readingTime={readingTime}
         />
 
