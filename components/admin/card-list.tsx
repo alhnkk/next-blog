@@ -201,6 +201,8 @@ const CardList = ({ title }: { title: string }) => {
                       alt={user.name}
                       fill
                       className="object-cover"
+                      quality={70}
+                      sizes="48px"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-600 font-medium">
@@ -299,6 +301,8 @@ const CardList = ({ title }: { title: string }) => {
                 alt={item.title}
                 fill
                 className="object-cover"
+                quality={70}
+                sizes="48px"
               />
             </div>
             <CardContent className="flex-1 p-0">

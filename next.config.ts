@@ -55,6 +55,10 @@ const nextConfig: NextConfig = {
   // Optimize dynamic imports
   staticPageGenerationTimeout: 60,
   
+  // ✅ OPTIMIZED: CSS and JavaScript minification
+  swcMinify: true,
+  productionBrowserSourceMaps: false,
+  
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.pexels.com" },
@@ -106,7 +110,15 @@ const nextConfig: NextConfig = {
           { key: 'Content-Type', value: 'application/rss+xml' }
         ] 
       },
-      // ✅ OPTIMIZED ISR: Blog post sayfaları için aggressive caching
+      // ✅ OPTIMIZED: Ana sayfa için aggressive ISR caching
+      { 
+        source: '/', 
+        headers: [
+          // 10 minutes local cache, 1 hour CDN cache, 7 days stale fallback
+          { key: 'Cache-Control', value: 'public, max-age=600, s-maxage=3600, stale-while-revalidate=604800' }
+        ] 
+      },
+      // ✅ OPTIMIZED: Blog post sayfaları için aggressive caching
       { 
         source: '/blog/:slug', 
         headers: [
@@ -114,13 +126,6 @@ const nextConfig: NextConfig = {
           // 86400 seconds (1 day) for CDN cache
           // stale-while-revalidate for serving stale content
           { key: 'Cache-Control', value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800' }
-        ] 
-      },
-      // Ana sayfa caching
-      { 
-        source: '/', 
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=600, s-maxage=3600, stale-while-revalidate=86400' }
         ] 
       },
     ];

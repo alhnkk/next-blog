@@ -25,14 +25,17 @@ const AdminDashboard = () => {
       src={backgroundImage}
       alt="Dashboard Background" 
       fill 
+      quality={65}
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
       {/* <AppAreaChart /> */}
       <Image 
       className="rounded-full z-0 flex m-auto"
       src="/logo.jpeg" 
-      alt="Dashboard Background" 
+      alt="Dashboard Logo" 
       width={256}
       height={256}
+      quality={80}
+      sizes="256px"
       />
       <div className="grid grid-cols-10 z-50 gap-4 items-end m-4">
         <Link href="/admin/posts/new" className="col-span-4">

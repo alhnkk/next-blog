@@ -85,6 +85,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         
+        {/* ✅ OPTIMIZED: Critical CSS preload strategy */}
+        <link rel="preload" href="/fonts/global.css" as="style" />
+        
         {/* Critical resources preload */}
         <link rel="preload" href="/logo.jpeg" as="image" type="image/jpeg" fetchPriority="high" />
         

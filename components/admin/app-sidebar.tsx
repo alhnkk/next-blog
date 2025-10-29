@@ -63,6 +63,9 @@ const AppSidebar = () => {
                   width={24}
                   height={24}
                   className="aspect-square rounded-full"
+                  priority={true}
+                  quality={75}
+                  sizes="24px"
                 />
                 <span className="group-data-[collapsible=icon]:hidden text-lg font-semibold">
                   Jurnalize

@@ -10,7 +10,15 @@ export function Footer() {
         <p className="text-muted-foreground text-sm">© 2024 Edebiyat & Sinema. Tüm hakları saklıdır.</p>
         <ThemeToggle />
         <Link href="/">
-            <Image src="/logo.jpeg" width={30} height={30} alt="logo" className="rounded-full" />
+            <Image 
+              src="/logo.jpeg" 
+              width={30} 
+              height={30} 
+              alt="logo" 
+              className="rounded-full"
+              quality={75}
+              sizes="30px"
+            />
         </Link>
         </div>
       </footer>

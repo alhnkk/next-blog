@@ -23,6 +23,9 @@ const Navbar = async () => {
                 height={32}
                 alt="Jurnalize"
                 className="rounded-full ring-2 ring-transparent group-hover:ring-primary/50 transition-all duration-200"
+                priority={true}
+                quality={75}
+                sizes="32px"
               />
             </div>
             <div className="flex flex-col">

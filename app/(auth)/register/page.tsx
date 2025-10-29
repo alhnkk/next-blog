@@ -13,6 +13,9 @@ export default function LoginPage() {
               width={20}
               height={20}
               alt="logo"
+              priority={true}
+              quality={75}
+              sizes="20px"
             />
           </div>
           Jurnalize

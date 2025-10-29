@@ -424,6 +424,8 @@ export default function SettingsPage() {
                         width={128}
                         height={64}
                         className="max-h-16 max-w-32 object-contain"
+                        quality={80}
+                        sizes="128px"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}

@@ -20,6 +20,8 @@ const UnauthorizedPage = () => {
               width="300"
               height="300"
               style={{ aspectRatio: "300/300", objectFit: "cover" }}
+              quality={75}
+              sizes="300px"
             />
           </div>
         </div>
