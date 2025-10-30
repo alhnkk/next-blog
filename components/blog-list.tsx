@@ -3,7 +3,7 @@ import { Calendar, MessageCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LikeButton } from "@/components/like-button";
-import Image from "next/image";
+import { Image } from "@imagekit/next";
 import Link from "next/link";
 
 interface Post {
@@ -73,10 +73,15 @@ const BlogList = ({ posts, currentUser }: BlogListProps) => {
               height={256}
               className="w-full h-[256px] object-cover"
               loading="lazy"
-              placeholder="blur"
-              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAhEQACAQIHAQAAAAAAAAAAAAABAgDABAUGITFBUWGRkf/aAAwDAQACEQMRAD8A0XGrC2t2m1hbuLltQjrjcpYBnQAzq7AKCwDKMA9QdN9LGt5IA90tGm/qg7TkWKIApwHHPynhHI4xw2d36Lgs4HM0c1Y6xkZJHgBAhE4JK5QDyOPwP//Z"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              quality={80}
+              transformation={[
+                {
+                  width: "400",
+                  height: "256",
+                  quality: 80,
+                  format: "auto"
+                }
+              ]}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
             />
           </Link>
           <CardContent className="px-0 py-0 flex flex-col max-w-lg">

@@ -195,6 +195,15 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
                 height={320}
                 className="w-full h-full object-cover"
                 priority
+                loading="eager"
+                transformation={[
+                  {
+                    width: "800",
+                    height: "320",
+                    quality: 85,
+                    format: "auto"
+                  }
+                ]}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
               />
               {post.featured && (

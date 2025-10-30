@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { formatTimeAgo } from "@/lib/utils/date";
 import { ArrowRight } from "lucide-react";
+import { Image } from "@imagekit/next";
 
 interface RelatedPost {
   id: number;
@@ -48,8 +49,28 @@ export function RelatedPosts({
           <article key={post.id} className="group">
             <Link 
               href={`/blog/${post.slug}`}
-              className="flex items-start justify-between py-3 px-0 hover:bg-muted/30 transition-colors rounded-lg"
+              className="flex items-start gap-3 py-3 px-0 hover:bg-muted/30 transition-colors rounded-lg"
             >
+              {/* Thumbnail Image */}
+              <div className="relative w-24 h-16 flex-shrink-0 rounded overflow-hidden bg-muted">
+                <Image
+                  src={post.featuredImageUrl || "/placeholder.jpeg"}
+                  alt={post.featuredImageAlt || post.title}
+                  width={96}
+                  height={64}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  transformation={[
+                    {
+                      width: "96",
+                      height: "64",
+                      quality: 75,
+                      format: "auto"
+                    }
+                  ]}
+                />
+              </div>
+
               <div className="flex-1 min-w-0 pr-4">
                 <h4 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-1">
                   {post.title}
