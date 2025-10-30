@@ -13,8 +13,9 @@ import { Breadcrumb } from "@/components/seo/breadcrumb";
 import { generateHomePageMetadata, generateCategoryMetadata, generateTagMetadata } from "@/lib/utils/seo";
 import type { Metadata } from "next";
 
-// ✅ OPTIMIZED: ISR - Ana sayfa 10 dakikada bir revalidate
-export const revalidate = 600; // 10 dakika
+// ✅ PERFORMANCE: Static Generation + ISR
+export const dynamic = 'force-static';
+export const revalidate = 3600; // 1 saat - daha makul revalidation
 export const dynamicParams = true;
 
 export async function generateMetadata({

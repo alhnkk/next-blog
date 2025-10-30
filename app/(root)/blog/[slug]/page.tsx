@@ -22,8 +22,9 @@ import { RelatedPosts } from "@/components/related-posts";
 import { EnhancedContent } from "@/components/enhanced-content";
 import type { Metadata } from "next";
 
-// ISR ayarları - her 1 saat başında revalidate et
-export const revalidate = 3600; // 1 saat
+// ✅ PERFORMANCE: Static Generation + ISR
+export const dynamic = 'force-static';
+export const revalidate = 86400; // 24 saat (1 gün) - daha az revalidation
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -276,11 +277,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
         {/* Article Content */}
         <article className="blog-content">
           {post.content ? (
-            <EnhancedContent
-              content={post.content}
-              relatedPosts={relatedPostsForComponent.slice(0, 3)}
-              currentPostId={Number(post.id)}
-            />
+            <EnhancedContent content={post.content} />
           ) : (
             <div className="text-center py-12">
               <p className="italic">Bu gönderi için içerik bulunmuyor.</p>

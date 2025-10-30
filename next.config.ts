@@ -39,45 +39,29 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   
-  // ✅ OPTIMIZED: Enable streaming for faster FCP
   experimental: {
     scrollRestoration: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    // ISR caching configuration handled by Next.js automatically
   },
   
-  // Enable ISR (Incremental Static Regeneration) for better performance
-  onDemandEntries: {
-    maxInactiveAge: 60 * 1000, // 60 seconds - extended TTL
-    pagesBufferLength: 10, // Buffer 10 pages for faster navigation
-  },
-  
-  // Optimize dynamic imports
-  staticPageGenerationTimeout: 60,
-  
-  // ✅ OPTIMIZED: CSS and JavaScript minification
-  swcMinify: true,
+  staticPageGenerationTimeout: 120,
   productionBrowserSourceMaps: false,
   
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "images.pexels.com" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "ik.imagekit.io" },
     ],
-    formats: ['image/avif', 'image/webp'],
+    formats: ['image/webp'],
     minimumCacheTTL: 31536000,
-    // Optimize device sizes
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Enable AVIF support first
+    deviceSizes: [640, 750, 1080, 1920],
+    imageSizes: [16, 32, 64, 96, 256],
     dangerouslyAllowSVG: false,
   },
 
   async headers() {
     return [
       { source: '/(.*)', headers: securityHeaders },
-      // ✅ OPTIMIZED: Auth API headers - allow credentials and proper CORS
       { 
         source: '/api/auth/(.*)', 
         headers: [
@@ -85,29 +69,18 @@ const nextConfig: NextConfig = {
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
           { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, Cookie' },
-          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
         ] 
       },
       { 
         source: '/api/(.*)', 
         headers: [
           ...securityHeaders, 
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }
-        ] 
-      },
-      { 
-        source: '/api/auth/session', 
-        headers: [
-          { key: 'Cache-Control', value: 'private, max-age=300' },
-          { key: 'Vary', value: 'Cookie' }
+          { key: 'Cache-Control', value: 'no-store' }
         ] 
       },
       { 
         source: '/_next/static/(.*)', 
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] 
-      },
-      { 
-        source: '/public/(.*)', 
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] 
       },
       { 
@@ -119,24 +92,6 @@ const nextConfig: NextConfig = {
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=3600' }, 
           { key: 'Content-Type', value: 'application/rss+xml' }
-        ] 
-      },
-      // ✅ OPTIMIZED: Ana sayfa için aggressive ISR caching
-      { 
-        source: '/', 
-        headers: [
-          // 10 minutes local cache, 1 hour CDN cache, 7 days stale fallback
-          { key: 'Cache-Control', value: 'public, max-age=600, s-maxage=3600, stale-while-revalidate=604800' }
-        ] 
-      },
-      // ✅ OPTIMIZED: Blog post sayfaları için aggressive caching
-      { 
-        source: '/blog/:slug', 
-        headers: [
-          // 1 hour for immediate revalidation
-          // 86400 seconds (1 day) for CDN cache
-          // stale-while-revalidate for serving stale content
-          { key: 'Cache-Control', value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800' }
         ] 
       },
     ];

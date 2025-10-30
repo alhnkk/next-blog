@@ -1,25 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { enhanceContentWithInternalLinks } from "@/lib/utils/internal-links";
-
-interface Post {
-  id: number;
-  title: string;
-  slug: string;
-}
 
 interface EnhancedContentProps {
   content: string;
-  relatedPosts: Post[];
-  currentPostId: number;
   className?: string;
 }
 
 export function EnhancedContent({
   content,
-  relatedPosts,
-  currentPostId,
   className = ""
 }: EnhancedContentProps) {
   const [enhancedContent, setEnhancedContent] = useState(content);
