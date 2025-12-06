@@ -60,21 +60,10 @@ export function formatShortDate(date: Date | string): string {
 /**
  * Comment objesi için tip tanımı
  */
-interface CommentWithDates {
+interface CommentLike {
   createdAt: Date | string;
   updatedAt: Date | string;
-  replies?: CommentWithDates[];
-  [key: string]: unknown;
-}
-
-/**
- * Normalize edilmiş comment tipi
- */
-interface NormalizedComment {
-  createdAt: string;
-  updatedAt: string;
-  replies: NormalizedComment[];
-  [key: string]: unknown;
+  replies?: CommentLike[];
 }
 
 /**
@@ -82,13 +71,13 @@ interface NormalizedComment {
  * @param comment - Comment objesi
  * @returns Formatlanmış comment objesi
  */
-export function normalizeCommentDates(comment: CommentWithDates): NormalizedComment {
+export function normalizeCommentDates<T extends CommentLike>(comment: T): T {
   return {
     ...comment,
     createdAt: comment.createdAt instanceof Date ? comment.createdAt.toISOString() : comment.createdAt,
     updatedAt: comment.updatedAt instanceof Date ? comment.updatedAt.toISOString() : comment.updatedAt,
-    replies: comment.replies?.map((reply) => normalizeCommentDates(reply)) || []
-  };
+    replies: comment.replies?.map((reply) => normalizeCommentDates(reply as T)) || []
+  } as T;
 }
 
 /**
