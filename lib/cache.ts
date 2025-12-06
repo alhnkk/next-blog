@@ -17,7 +17,7 @@ export const CACHE_TIMES = {
 } as const;
 
 // Cache wrapper fonksiyonu
-export function createCachedFunction<T extends (...args: never[]) => Promise<unknown>>(
+export function createCachedFunction<T extends (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>>(
   fn: T,
   keyParts: string[],
   options: {
@@ -26,12 +26,12 @@ export function createCachedFunction<T extends (...args: never[]) => Promise<unk
   } = {}
 ): T {
   return unstable_cache(
-    fn,
+    fn as (...args: unknown[]) => Promise<unknown>,
     keyParts,
     {
       revalidate: options.revalidate ?? CACHE_TIMES.MEDIUM,
       tags: options.tags ?? [],
     }
-  ) as unknown as T;
+  ) as T;
 }
 
