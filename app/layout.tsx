@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Poppins } from "next/font/google";
+import { Poppins, Lora } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SettingsProvider } from "@/components/providers/settings-provider";
@@ -14,6 +14,15 @@ const poppins = Poppins({
   display: 'swap', // Immediately use fallback, swap when loaded
   preload: true,
   fallback: ['system-ui', 'arial'],
+});
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: 'swap',
+  preload: true,
+  fallback: ['Georgia', 'serif'],
 });
 
 export const metadata: Metadata = {
@@ -140,7 +149,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${poppins.className} antialiased`}>
+      <body className={`${poppins.variable} ${lora.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

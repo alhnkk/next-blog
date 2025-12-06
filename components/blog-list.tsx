@@ -61,18 +61,18 @@ const BlogList = ({ posts }: BlogListProps) => {
         >
           <Link
             href={`/blog/${post.slug}`}
-            className="w-[400px] h-[256px] bg-muted rounded-[1px] flex items-center justify-center"
+            className="w-[400px] h-[224px] bg-muted rounded-[1px] flex items-center justify-center"
           >
             <Image
               src={post.featuredImageUrl || "/placeholder2.jpeg"}
               alt={post.featuredImageAlt || post.title}
-              width={400}
+              width={512}
               height={256}
-              className="w-full h-[256px] object-cover"
+              className="w-full h-[224px] object-cover rounded"
               loading="lazy"
               transformation={[
                 {
-                  width: "400",
+                  width: "512",
                   height: "256",
                   quality: 80,
                   format: "auto"
@@ -81,7 +81,7 @@ const BlogList = ({ posts }: BlogListProps) => {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
             />
           </Link>
-          <CardContent className="px-0 py-0 flex flex-col max-w-lg">
+          <CardContent className="px-0 py-0 flex flex-col max-w-[512px]">
             <div className="flex items-start gap-6 mt-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
@@ -108,12 +108,12 @@ const BlogList = ({ posts }: BlogListProps) => {
             </div>
 
             <Link href={`/blog/${post.slug}`}>
-              <h3 className="mt-4 text-2xl font-semibold tracking-tight my-5 hover:text-primary transition-colors cursor-pointer">
+              <h3 className="mt-4 text-3xl font-bold tracking-tight my-5 hover:text-primary transition-colors cursor-pointer">
                 {post.title}
               </h3>
             </Link>
 
-            <p className="mt-2 text-muted-foreground line-clamp-2 text-ellipsis mr-4">
+            <p className="mt-2 text-muted-foreground line-clamp-2 text-ellipsis mr-4 font-serif">
               {post.excerpt ||
                 post.content?.substring(0, 200) + "..." ||
                 "İçerik mevcut değil."}

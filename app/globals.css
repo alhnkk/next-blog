@@ -7,6 +7,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
+  --font-serif: var(--font-lora);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -286,59 +287,79 @@ ipTap Editor Styles */
   background-color: #374151;
   color: #f9fafb;
 }/* 
-Blog Content Display Styles */
-.blog-content h1 {
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 2rem 0 1rem 0;
-  line-height: 1.2;
+Blog Content Display Styles - Optimized Typography */
+
+/* Base content styles */
+.blog-content {
+  font-family: var(--font-lora);
+  font-size: 1.125rem;
+  line-height: 1.8;
   color: inherit;
+  letter-spacing: 0.01em;
+  word-spacing: 0.05em;
+}
+
+/* Headings - Using Poppins for contrast */
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.blog-content h4,
+.blog-content h5,
+.blog-content h6 {
+  font-family: var(--font-poppins);
+  font-weight: 700;
+  color: inherit;
+  letter-spacing: -0.02em;
+}
+
+.blog-content h1 {
+  font-size: 2.25rem;
+  margin: 2.5rem 0 1.25rem 0;
+  line-height: 1.2;
 }
 
 .blog-content h2 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 1.5rem 0 0.75rem 0;
-  line-height: 1.3;
-  color: inherit;
+  font-size: 1.75rem;
+  margin: 2.25rem 0 1rem 0;
+  line-height: 1.25;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid oklch(0.9 0 0);
 }
 
 .blog-content h3 {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin: 1.25rem 0 0.5rem 0;
-  line-height: 1.4;
-  color: inherit;
+  font-size: 1.375rem;
+  margin: 2rem 0 0.75rem 0;
+  line-height: 1.3;
 }
 
 .blog-content h4 {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin: 1rem 0 0.5rem 0;
-  line-height: 1.4;
-  color: inherit;
+  margin: 1.75rem 0 0.625rem 0;
+  line-height: 1.35;
 }
 
 .blog-content h5 {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin: 1rem 0 0.5rem 0;
+  margin: 1.5rem 0 0.5rem 0;
   line-height: 1.4;
-  color: inherit;
 }
 
 .blog-content h6 {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin: 1rem 0 0.5rem 0;
+  margin: 1.25rem 0 0.5rem 0;
   line-height: 1.4;
-  color: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
+/* Paragraphs */
 .blog-content p {
-  margin: 1rem 0;
-  line-height: 1.7;
-  color: inherit;
+  margin: 1.5rem 0;
+  line-height: 1.85;
+  font-size: 1.125rem;
 }
 
 .blog-content p:first-child {
@@ -349,97 +370,206 @@ Blog Content Display Styles */
   margin-bottom: 0;
 }
 
+/* First paragraph styling - larger leading */
+.blog-content > p:first-of-type {
+  font-size: 1.25rem;
+  line-height: 1.75;
+  color: inherit;
+}
+
+/* Lists */
 .blog-content ul {
   list-style-type: disc;
-  margin: 1rem 0;
-  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  padding-left: 1.75rem;
 }
 
 .blog-content ol {
   list-style-type: decimal;
-  margin: 1rem 0;
-  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  padding-left: 1.75rem;
 }
 
 .blog-content li {
+  margin: 0.75rem 0;
+  line-height: 1.75;
+  padding-left: 0.25rem;
+}
+
+.blog-content li::marker {
+  color: oklch(0.5 0 0);
+}
+
+/* Nested lists */
+.blog-content ul ul,
+.blog-content ol ol,
+.blog-content ul ol,
+.blog-content ol ul {
   margin: 0.5rem 0;
-  line-height: 1.6;
-  color: inherit;
 }
 
+/* Blockquotes */
 .blog-content blockquote {
-  border-left: 4px solid #e5e7eb;
-  padding-left: 1rem;
-  margin: 1.5rem 0;
+  position: relative;
+  border-left: 4px solid oklch(0.7 0.1 250);
+  margin: 2rem 0;
+  padding: 1.25rem 1.5rem;
   font-style: italic;
-  color: #6b7280;
-  background-color: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.25rem;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: oklch(0.45 0 0);
+  background: linear-gradient(135deg, oklch(0.97 0.01 250 / 30%), oklch(0.98 0 0));
+  border-radius: 0 0.5rem 0.5rem 0;
 }
 
+.blog-content blockquote p {
+  margin: 0.75rem 0;
+  font-size: inherit;
+}
+
+.blog-content blockquote p:first-child {
+  margin-top: 0;
+}
+
+.blog-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Inline code */
 .blog-content code {
-  background-color: #f3f4f6;
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-  color: #dc2626;
+  background-color: oklch(0.95 0 0);
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.3rem;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 0.9em;
+  color: oklch(0.45 0.2 15);
+  border: 1px solid oklch(0.9 0 0);
 }
 
+/* Code blocks */
 .blog-content pre {
-  background-color: #1f2937;
-  color: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.5rem;
+  background-color: oklch(0.18 0 0);
+  color: oklch(0.95 0 0);
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.625rem;
   overflow-x: auto;
-  margin: 1.5rem 0;
+  margin: 2rem 0;
+  border: 1px solid oklch(0.25 0 0);
 }
 
 .blog-content pre code {
   background-color: transparent;
   padding: 0;
   color: inherit;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  border: none;
 }
 
+/* Strong & emphasis */
 .blog-content strong {
-  font-weight: bold;
+  font-weight: 700;
   color: inherit;
 }
 
 .blog-content em {
   font-style: italic;
-  color: inherit;
 }
 
+/* Links */
 .blog-content a {
-  color: #3b82f6;
+  color: oklch(0.55 0.2 250);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: all 0.2s ease;
 }
 
 .blog-content a:hover {
-  color: #1d4ed8;
+  color: oklch(0.45 0.25 250);
+  text-decoration-thickness: 2px;
+}
+
+/* Horizontal rule */
+.blog-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(0.8 0 0), transparent);
+  margin: 3rem 0;
+}
+
+/* Images */
+.blog-content img {
+  border-radius: 0.5rem;
+  margin: 2rem 0;
+}
+
+/* Tables */
+.blog-content table {
+  width: 100%;
+  margin: 2rem 0;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.blog-content th,
+.blog-content td {
+  padding: 0.75rem 1rem;
+  border: 1px solid oklch(0.9 0 0);
+  text-align: left;
+}
+
+.blog-content th {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  background-color: oklch(0.97 0 0);
 }
 
 /* Dark mode styles for blog content */
+.dark .blog-content h2 {
+  border-bottom-color: oklch(0.3 0 0);
+}
+
+.dark .blog-content li::marker {
+  color: oklch(0.6 0 0);
+}
+
 .dark .blog-content blockquote {
-  border-left-color: #374151;
-  color: #9ca3af;
-  background-color: #1f2937;
+  border-left-color: oklch(0.5 0.15 250);
+  color: oklch(0.7 0 0);
+  background: linear-gradient(135deg, oklch(0.2 0.02 250 / 40%), oklch(0.15 0 0));
 }
 
 .dark .blog-content code {
-  background-color: #374151;
-  color: #fbbf24;
+  background-color: oklch(0.25 0 0);
+  color: oklch(0.85 0.15 60);
+  border-color: oklch(0.3 0 0);
+}
+
+.dark .blog-content pre {
+  background-color: oklch(0.12 0 0);
+  border-color: oklch(0.2 0 0);
 }
 
 .dark .blog-content a {
-  color: #60a5fa;
+  color: oklch(0.7 0.18 250);
 }
 
 .dark .blog-content a:hover {
-  color: #93c5fd;
+  color: oklch(0.8 0.15 250);
+}
+
+.dark .blog-content hr {
+  background: linear-gradient(90deg, transparent, oklch(0.35 0 0), transparent);
+}
+
+.dark .blog-content th {
+  background-color: oklch(0.2 0 0);
+}
+
+.dark .blog-content th,
+.dark .blog-content td {
+  border-color: oklch(0.25 0 0);
 }
 
 /* Line clamp utilities */

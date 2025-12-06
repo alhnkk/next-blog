@@ -158,7 +158,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
         <main className="max-w-3xl px-8 lg:px-0 py-12">
           {/* Article Header */}
           <header className="mb-12">
-            <h1 className="text-4xl md:text-4xl font-bold leading-tight mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
               {post.title}
             </h1>
 
@@ -262,7 +262,7 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
       </main>
     </div>
         {/* Sidebar */}
-        <aside className="hidden lg:block w-72 shrink-0 pt-12 pl-8 border-l border-border/50">
+        <aside className="hidden lg:block w-84 shrink-0 pt-12 pl-8 border-l border-border/50">
           <div className="sticky top-24 space-y-8">
             {/* Breadcrumb */}
             <Breadcrumb 
