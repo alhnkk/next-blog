@@ -17,7 +17,8 @@ export const CACHE_TIMES = {
 } as const;
 
 // Cache wrapper fonksiyonu
-export function createCachedFunction<T extends (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createCachedFunction<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   keyParts: string[],
   options: {
@@ -26,7 +27,7 @@ export function createCachedFunction<T extends (...args: Parameters<T>) => Promi
   } = {}
 ): T {
   return unstable_cache(
-    fn as (...args: unknown[]) => Promise<unknown>,
+    fn,
     keyParts,
     {
       revalidate: options.revalidate ?? CACHE_TIMES.MEDIUM,
