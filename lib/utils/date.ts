@@ -58,16 +58,36 @@ export function formatShortDate(date: Date | string): string {
 }
 
 /**
+ * Comment objesi için tip tanımı
+ */
+interface CommentWithDates {
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  replies?: CommentWithDates[];
+  [key: string]: unknown;
+}
+
+/**
+ * Normalize edilmiş comment tipi
+ */
+interface NormalizedComment {
+  createdAt: string;
+  updatedAt: string;
+  replies: NormalizedComment[];
+  [key: string]: unknown;
+}
+
+/**
  * Tarihi ISO string'e dönüştürür (recursive olarak comment objeleri için)
- * @param comment - Comment objesi (any type)
+ * @param comment - Comment objesi
  * @returns Formatlanmış comment objesi
  */
-export function normalizeCommentDates(comment: any): any {
+export function normalizeCommentDates(comment: CommentWithDates): NormalizedComment {
   return {
     ...comment,
     createdAt: comment.createdAt instanceof Date ? comment.createdAt.toISOString() : comment.createdAt,
     updatedAt: comment.updatedAt instanceof Date ? comment.updatedAt.toISOString() : comment.updatedAt,
-    replies: comment.replies?.map((reply: any) => normalizeCommentDates(reply)) || []
+    replies: comment.replies?.map((reply) => normalizeCommentDates(reply)) || []
   };
 }
 
