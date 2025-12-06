@@ -7,7 +7,7 @@ import UserNav from "./user-nav";
 
 const Navbar = async () => {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b border-border/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 my-6 px-8 lg:px-0">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between h-16">
           
@@ -16,22 +16,7 @@ const Navbar = async () => {
             href="/" 
             className="flex items-center gap-3 group hover:opacity-80 transition-opacity duration-200"
           >
-            <div className="relative flex-shrink-0">
-              <Image
-                src="/logo.jpeg"
-                width={32}
-                height={32}
-                alt="Jurnalize"
-                className="rounded-full ring-2 ring-transparent group-hover:ring-primary/50 transition-all duration-200"
-                priority={true}
-                quality={75}
-                sizes="32px"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight">Jurnalize</span>
-              <span className="text-xs text-muted-foreground">Blog</span>
-            </div>
+            <span className="text-4xl font-bold tracking-tight">jurnalize</span>
           </Link>
 
          
@@ -42,17 +27,17 @@ const Navbar = async () => {
           <nav className="hidden sm:flex items-center gap-8">
             <Link 
               href="/" 
-              className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors duration-200 group"
+              className="flex items-center gap-2 font-medium text-foreground/80 hover:text-foreground transition-colors duration-200 group"
             >
-              <Home className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+               {/* <Home className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" /> */}
               <span>Ana Sayfa</span>
             </Link>
             
             <Link 
               href="/contact" 
-              className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors duration-200 group"
+              className="flex items-center gap-2 font-medium text-foreground/80 hover:text-foreground transition-colors duration-200 group"
             >
-              <Mail className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              {/* <Mail className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" /> */}
               <span>İletişim</span>
             </Link>
           </nav>

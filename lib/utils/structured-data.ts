@@ -44,13 +44,19 @@ export const generateOrganizationSchema = () => {
   }
 }
 
+// Helper: Tarihi ISO string'e çevir (Date veya string kabul eder)
+const toISOString = (date: Date | string): string => {
+  if (typeof date === 'string') return new Date(date).toISOString();
+  return date.toISOString();
+};
+
 // Article Schema (Blog Posts için)
 export const generateArticleSchema = (post: {
   title: string
   excerpt?: string | null
   slug: string
-  createdAt: Date
-  updatedAt?: Date | null
+  createdAt: Date | string
+  updatedAt?: Date | string | null
   author: {
     name: string
     image?: string | null
@@ -69,8 +75,8 @@ export const generateArticleSchema = (post: {
     headline: post.title,
     description: post.excerpt || post.title,
     url: articleUrl,
-    datePublished: post.createdAt.toISOString(),
-    dateModified: (post.updatedAt || post.createdAt).toISOString(),
+    datePublished: toISOString(post.createdAt),
+    dateModified: toISOString(post.updatedAt || post.createdAt),
     author: {
       '@type': 'Person',
       name: post.author.name,

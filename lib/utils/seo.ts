@@ -42,6 +42,12 @@ export const generateHomePageMetadata = (): Metadata => {
   }
 }
 
+// Helper: Tarihi ISO string'e çevir (Date veya string kabul eder)
+const toISOString = (date: Date | string): string => {
+  if (typeof date === 'string') return new Date(date).toISOString();
+  return date.toISOString();
+};
+
 // Blog post metadata
 export const generatePostMetadata = (post: {
   title: string
@@ -55,7 +61,7 @@ export const generatePostMetadata = (post: {
   category?: {
     name: string
   } | null
-  createdAt: Date
+  createdAt: Date | string
 }): Metadata => {
   const postUrl = `${baseUrl}/blog/${post.slug}`
   
@@ -86,7 +92,7 @@ export const generatePostMetadata = (post: {
       siteName,
       locale: 'tr_TR',
       type: 'article',
-      publishedTime: post.createdAt.toISOString(),
+      publishedTime: toISOString(post.createdAt),
       authors: [post.author.name],
       section: post.category?.name,
       images: [

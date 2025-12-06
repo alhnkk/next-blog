@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import { togglePostLike, getPostLikeStatus } from "@/lib/actions/likes";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/hooks/use-session";
 
 interface LikeButtonProps {
   postId: number;
@@ -25,12 +26,16 @@ export function LikeButton({
   postId,
   initialLiked = false,
   initialCount = 0,
-  currentUser,
+  currentUser: propUser,
   variant = "ghost",
   size = "default",
   showCount = true,
   className,
 }: LikeButtonProps) {
+  // ✅ Client-side session - server'ı bloklamaz
+  const { user: sessionUser } = useSession();
+  const currentUser = propUser || sessionUser;
+  
   const [liked, setLiked] = useState(initialLiked);
   const [likeCount, setLikeCount] = useState(initialCount);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +45,7 @@ export function LikeButton({
     if (currentUser) {
       loadLikeStatus();
     }
-  }, [postId, currentUser]);
+  }, [postId, currentUser?.id]);
 
   const loadLikeStatus = async () => {
     try {

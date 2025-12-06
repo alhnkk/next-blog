@@ -38,18 +38,15 @@ interface Post {
 
 interface BlogListProps {
   posts: Post[];
-  currentUser?: {
-    id: string;
-    name: string;
-  } | null;
 }
 
-const BlogList = ({ posts, currentUser }: BlogListProps) => {
+// ✅ Server Component - LikeButton kendi session'ını client-side alıyor
+const BlogList = ({ posts }: BlogListProps) => {
   if (posts.length === 0) {
     return (
       <div className="mt-8 text-center py-12">
         <p className="text-muted-foreground text-lg">
-          Henüz gönderi bulunmuyor.
+          Henüz + bulunmuyor.
         </p>
       </div>
     );
@@ -126,7 +123,6 @@ const BlogList = ({ posts, currentUser }: BlogListProps) => {
               <LikeButton
                 postId={post.id}
                 initialCount={post._count.likes}
-                currentUser={currentUser}
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-red-500 p-0 h-auto"

@@ -1,8 +1,9 @@
 "use server";
 
 import { prismadb } from "@/lib/prismadb";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { PostStatus } from "@/lib/generated/prisma";
+import { CACHE_TAGS } from "@/lib/cache";
 
 // Types for post operations
 export interface CreatePostData {
@@ -502,6 +503,10 @@ export async function createPost(data: CreatePostData) {
     revalidatePath("/admin/posts");
     revalidatePath("/blog");
     revalidatePath(`/blog/${post.slug}`);
+    
+    // ✅ Cache tag'lerini invalidate et
+    revalidateTag(CACHE_TAGS.POSTS);
+    revalidateTag(CACHE_TAGS.POST_DETAIL);
 
     return {
       success: true,
@@ -619,6 +624,10 @@ export async function updatePost(postId: number, data: UpdatePostData) {
     if (data.slug && data.slug !== existingPost.slug) {
       revalidatePath(`/blog/${data.slug}`);
     }
+    
+    // ✅ Cache tag'lerini invalidate et
+    revalidateTag(CACHE_TAGS.POSTS);
+    revalidateTag(CACHE_TAGS.POST_DETAIL);
 
     return {
       success: true,
@@ -663,6 +672,10 @@ export async function deletePost(postId: number) {
     revalidatePath("/admin/posts");
     revalidatePath("/blog");
     revalidatePath(`/blog/${post.slug}`);
+    
+    // ✅ Cache tag'lerini invalidate et
+    revalidateTag(CACHE_TAGS.POSTS);
+    revalidateTag(CACHE_TAGS.POST_DETAIL);
 
     return {
       success: true,
@@ -716,6 +729,9 @@ export async function togglePostFeatured(postId: number) {
     revalidatePath("/admin/posts");
     revalidatePath("/blog");
     revalidatePath(`/blog/${post.slug}`);
+    
+    // ✅ Cache tag'lerini invalidate et
+    revalidateTag(CACHE_TAGS.POSTS);
 
     return {
       success: true,
@@ -771,6 +787,10 @@ export async function updatePostStatus(postId: number, status: PostStatus) {
     revalidatePath("/admin/posts");
     revalidatePath("/blog");
     revalidatePath(`/blog/${post.slug}`);
+    
+    // ✅ Cache tag'lerini invalidate et
+    revalidateTag(CACHE_TAGS.POSTS);
+    revalidateTag(CACHE_TAGS.POST_DETAIL);
 
     const statusMessages = {
       [PostStatus.DRAFT]: "taslak olarak kaydedildi",

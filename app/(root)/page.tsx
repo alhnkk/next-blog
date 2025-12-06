@@ -2,10 +2,13 @@ import BlogList from "@/components/blog-list";
 import Sidebar from "@/components/sidebar";
 import { Pagination, PaginationInfo, MobilePagination } from "@/components/pagination";
 import Link from "next/link";
-import { getPublishedPosts, getPostsByCategorySlug, getPostsByTag } from "@/lib/actions/posts";
-import { getCategories } from "@/lib/actions/categories";
-import { getPopularTags } from "@/lib/actions/tags";
-import { auth } from "@/lib/auth";
+import { 
+  getCachedPublishedPosts, 
+  getCachedPostsByCategorySlug, 
+  getCachedPostsByTag,
+  getCachedCategories,
+  getCachedPopularTags 
+} from "@/lib/actions/cached-queries";
 import { ImageKitProvider } from "@imagekit/next";
 import { generateWebSiteSchema, generateOrganizationSchema, generateBlogSchema } from "@/lib/utils/structured-data";
 import { StructuredData } from "@/components/seo/structured-data";
@@ -13,10 +16,8 @@ import { Breadcrumb } from "@/components/seo/breadcrumb";
 import { generateHomePageMetadata, generateCategoryMetadata, generateTagMetadata } from "@/lib/utils/seo";
 import type { Metadata } from "next";
 
-// ✅ PERFORMANCE: Static Generation + ISR
-export const dynamic = 'force-static';
-export const revalidate = 3600; // 1 saat - daha makul revalidation
-export const dynamicParams = true;
+// ✅ PERFORMANCE: ISR ile statik sayfa, searchParams dinamik
+export const revalidate = 300; // 5 dakika - daha agresif caching
 
 export async function generateMetadata({
   searchParams,
@@ -26,7 +27,7 @@ export async function generateMetadata({
   const resolvedSearchParams = await searchParams;
   
   if (resolvedSearchParams.category) {
-    const categoriesResult = await getCategories();
+    const categoriesResult = await getCachedCategories();
     const categories = categoriesResult.success ? categoriesResult.data || [] : [];
     const selectedCategory = categories.find((cat) => cat.slug === resolvedSearchParams.category);
     
@@ -36,9 +37,9 @@ export async function generateMetadata({
   }
   
   if (resolvedSearchParams.tag) {
-    // Tag gönderi sayısını al
-    const tagPostsResult = await getPostsByTag(resolvedSearchParams.tag, "PUBLISHED");
-    const postCount = tagPostsResult.success ? tagPostsResult.data?.length || 0 : 0;
+    // Tag gönderi sayısını al - cached sorgu
+    const tagPostsResult = await getCachedPostsByTag(resolvedSearchParams.tag, 1, 1);
+    const postCount = tagPostsResult.success ? tagPostsResult.pagination?.total || 0 : 0;
     
     return generateTagMetadata(resolvedSearchParams.tag, postCount);
   }
@@ -53,42 +54,21 @@ const BlogPage = async ({
 }) => {
   const resolvedSearchParams = await searchParams;
   
-  // ✅ OPTIMIZED: Session loading'i non-blocking yap - asynchronous olarak çalışsın
-  let currentUser = null;
-  try {
-    const { headers } = await import("next/headers");
-    const session = await auth.api.getSession({
-      headers: await headers()
-    });
-    
-    if (session?.user) {
-      currentUser = {
-        id: session.user.id,
-        name: session.user.name,
-      };
-    }
-  } catch (error) {
-    console.log("Session alınamadı:", error);
-  }
-  
   // Sayfa numarasını al
   const currentPage = parseInt(resolvedSearchParams.page || "1");
   const postsPerPage = 6; // Sayfa başına gönderi sayısı
 
-  // Filtre tipine göre postları getir
-  let postsResult;
-  if (resolvedSearchParams.category) {
-    postsResult = await getPostsByCategorySlug(resolvedSearchParams.category, "PUBLISHED", currentPage, postsPerPage);
-  } else if (resolvedSearchParams.tag) {
-    postsResult = await getPostsByTag(resolvedSearchParams.tag, "PUBLISHED", currentPage, postsPerPage);
-  } else {
-    postsResult = await getPublishedPosts(currentPage, postsPerPage);
-  }
-
-  // ✅ OPTIMIZED: Kategoriler ve tagları paralel yükle
-  const [categoriesResult, popularTagsResult] = await Promise.all([
-    getCategories(),
-    getPopularTags(10),
+  // ✅ OPTIMIZED: Tüm sorguları paralel + cached olarak çalıştır
+  const [postsResult, categoriesResult, popularTagsResult] = await Promise.all([
+    // Filtre tipine göre cached postları getir
+    resolvedSearchParams.category
+      ? getCachedPostsByCategorySlug(resolvedSearchParams.category, currentPage, postsPerPage)
+      : resolvedSearchParams.tag
+        ? getCachedPostsByTag(resolvedSearchParams.tag, currentPage, postsPerPage)
+        : getCachedPublishedPosts(currentPage, postsPerPage),
+    // Kategoriler ve taglar
+    getCachedCategories(),
+    getCachedPopularTags(10),
   ]);
 
   const posts = postsResult.success ? postsResult.data || [] : [];
@@ -218,7 +198,7 @@ const BlogPage = async ({
             )}
           </div>
           {/* @ts-expect-error Type mismatch will be fixed later */}
-          <BlogList posts={posts} currentUser={currentUser} />
+          <BlogList posts={posts} />
           
           {/* Sayfalama */}
           {pagination && pagination.totalPages > 1 && (

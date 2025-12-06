@@ -1,7 +1,8 @@
 "use server";
 
 import { prismadb } from "@/lib/prismadb";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 // GET ALL CATEGORIES WITH POST COUNTS
 export async function getCategories() {
@@ -199,6 +200,10 @@ export async function createCategory(data: {
 
     revalidatePath("/");
     revalidatePath("/admin/categories");
+    
+    // ✅ Cache tag'lerini invalidate et
+    revalidateTag(CACHE_TAGS.CATEGORIES);
+    revalidateTag(CACHE_TAGS.POSTS);
 
     return {
       success: true,
@@ -297,6 +302,10 @@ export async function updateCategory(
 
     revalidatePath("/");
     revalidatePath("/admin/categories");
+    
+    // ✅ Cache tag'lerini invalidate et
+    revalidateTag(CACHE_TAGS.CATEGORIES);
+    revalidateTag(CACHE_TAGS.POSTS);
 
     return {
       success: true,
@@ -351,6 +360,9 @@ export async function deleteCategory(categoryId: number) {
 
     revalidatePath("/");
     revalidatePath("/admin/categories");
+    
+    // ✅ Cache tag'lerini invalidate et
+    revalidateTag(CACHE_TAGS.CATEGORIES);
 
     return {
       success: true,

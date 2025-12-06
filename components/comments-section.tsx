@@ -10,6 +10,7 @@ import { normalizeCommentDates } from "@/lib/utils/date";
 import { MessageSquare, RefreshCw } from "lucide-react";
 import { CenterLoading } from "@/components/ui/loading";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useSession } from "@/hooks/use-session";
 
 interface Comment {
   id: number;
@@ -38,19 +39,24 @@ interface CommentsSectionProps {
 export function CommentsSection({
   postId,
   initialComments = [],
-  currentUser,
+  currentUser: propUser,
 }: CommentsSectionProps) {
+  // ✅ Client-side session - server'ı bloklamaz
+  const { user: sessionUser } = useSession();
+  
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [user, setUser] = useState(currentUser);
+  const [user, setUser] = useState(propUser || sessionUser);
 
   useEffect(() => {
-    // Server'dan gelen user bilgisini güncelle
-    if (currentUser) {
-      setUser(currentUser);
+    // Session user'ı güncelle
+    if (sessionUser && !propUser) {
+      setUser(sessionUser);
+    } else if (propUser) {
+      setUser(propUser);
     }
-  }, [currentUser]);
+  }, [sessionUser, propUser]);
 
   const loadComments = async (showLoader = true) => {
     if (showLoader) {

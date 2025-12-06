@@ -1,5 +1,4 @@
-import { getPostBySlug, getRelatedPostsForSlug } from "@/lib/actions/posts";
-import { auth } from "@/lib/auth";
+import { getCachedPostBySlug, getCachedRelatedPosts, getCachedAllPostSlugs } from "@/lib/actions/cached-queries";
 import { LikeButton } from "@/components/like-button";
 import {
   MessageSquare,
@@ -24,7 +23,15 @@ import type { Metadata } from "next";
 
 // ✅ PERFORMANCE: Static Generation + ISR
 export const dynamic = 'force-static';
-export const revalidate = 86400; // 24 saat (1 gün) - daha az revalidation
+export const revalidate = 3600; // 1 saat - daha dengeli revalidation
+
+// ✅ PERFORMANCE: Build time'da tüm post sayfalarını oluştur
+export async function generateStaticParams() {
+  const posts = await getCachedAllPostSlugs();
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -81,7 +88,7 @@ interface Post {
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const postResult = await getPostBySlug(slug);
+  const postResult = await getCachedPostBySlug(slug);
   
   if (!postResult.success || !postResult.data) {
     return {
@@ -95,31 +102,23 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 const BlogPostPage = async ({ params }: BlogPostPageProps) => {
   const { slug } = await params;
-  const postResult = await getPostBySlug(slug);
+  
+  // ✅ OPTIMIZED: Post ve related posts'u paralel al
+  const postResult = await getCachedPostBySlug(slug);
   
   if (!postResult.success || !postResult.data) {
     notFound();
   }
 
   const post = postResult.data;
-  
-  // Session bilgisini al - basit yaklaşım
-  let currentUser = null;
-  try {
-    const { headers } = await import("next/headers");
-    const session = await auth.api.getSession({
-      headers: await headers()
-    });
-    
-    if (session?.user) {
-      currentUser = {
-        id: session.user.id,
-        name: session.user.name,
-      };
-    }
-  } catch (error) {
-    // Session alınamadı
-  }
+
+  // ✅ OPTIMIZED: İlgili yazıları cached olarak getir
+  const relatedPostsResult = await getCachedRelatedPosts(
+    Number(post.id),
+    post.category?.id,
+    post.tags || [],
+    3
+  );
 
   const imagekitUrlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
 
@@ -128,15 +127,6 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
 
   // SEO bilgilerini hesapla
   const readingTime = calculateReadingTime(post.content || '');
-  const wordCount = getWordCount(post.content || '');
-
-  // ✅ OPTIMIZED: İlgili yazıları getir - kategori ve tag bazlı filtre
-  const relatedPostsResult = await getRelatedPostsForSlug(
-    Number(post.id),
-    post.category?.id,
-    post.tags || [],
-    3
-  );
   
   const relatedPostsForComponent = relatedPostsResult.success 
     ? (relatedPostsResult.data || []).map(rp => ({
@@ -267,7 +257,6 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
               <LikeButton
                 postId={post.id}
                 initialCount={post._count.likes}
-                currentUser={currentUser}
                 variant="ghost"
                 size="default"
               />
@@ -346,7 +335,6 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
         <CommentsSection
           postId={post.id}
           initialComments={[]}
-          currentUser={currentUser}
         />
       </main>
     </div>
