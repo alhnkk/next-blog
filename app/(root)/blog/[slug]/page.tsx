@@ -1,9 +1,5 @@
 import { getCachedPostBySlug, getCachedRelatedPosts, getCachedAllPostSlugs } from "@/lib/actions/cached-queries";
 import { LikeButton } from "@/components/like-button";
-import {
-  MessageSquare,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { CommentsSection } from "@/components/comments-section";
@@ -156,20 +152,10 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
   return (
     <ImageKitProvider urlEndpoint={imagekitUrlEndpoint || ''}>
       <StructuredData data={[articleSchema, breadcrumbSchema]} />
-      <div className="min-h-screen">
-
+      <div className="flex max-w-7xl mx-auto justify-between">
+      <div>
         {/* Main Content */}
-        <main className="max-w-2xl mx-auto px-4 py-12">
-          {/* Breadcrumb */}
-          <Breadcrumb 
-            items={[
-              { label: 'Blog', href: '/' },
-              ...(post.category ? [{ label: post.category.name, href: `/?category=${post.category.slug}` }] : []),
-              { label: post.title }
-            ]}
-            className="mb-8"
-          />
-
+        <main className="max-w-3xl px-8 lg:px-0 py-12">
           {/* Article Header */}
           <header className="mb-12">
             <h1 className="text-4xl md:text-4xl font-bold leading-tight mb-6">
@@ -177,19 +163,19 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
             </h1>
 
             {/* Featured Image */}
-            <div className="relative w-full h-80 mb-8 rounded-[1px] overflow-hidden">
+            <div className="relative w-full h-[400px] mb-8 rounded overflow-hidden  border border-border/90">
               <Image
                 src={post.featuredImageUrl || "/placeholder.jpeg"}
                 alt={post.featuredImageAlt || post.title}
                 width={800}
-                height={320}
-                className="w-full h-full object-cover"
+                height={400}  
+                className="w-full h-full object-cover rounded-[1px]"
                 priority
                 loading="eager"
                 transformation={[
                   {
                     width: "800",
-                    height: "320",
+                    height: "400",
                     quality: 85,
                     format: "auto"
                   }
@@ -204,69 +190,6 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
                 </div>
               )}
             </div>
-
-          {post.excerpt && (
-            <p className="leading-relaxed mb-8 line-clamp-3">{post.excerpt}</p>
-          )}
-
-          {/* Author and Meta */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12">
-                <AvatarImage
-                  src={post.author.image || undefined}
-                  alt={post.author.name}
-                />
-                <AvatarFallback>
-                  {post.author.name
-                    ?.split(" ")
-                    .map((word: string) => word.charAt(0))
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2) || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium">{post.author.name}</p>
-                <div className="flex items-center gap-2 text-sm">
-                  <span>
-                    {new Date(post.createdAt).toLocaleDateString("tr-TR", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                  <span>•</span>
-                  <span>{readingTime} dk okuma</span>
-                  <span>•</span>
-                  {post.category && (
-                    <>
-                      <Link href={`/?category=${post.category.slug}`}>
-                        <span className="cursor-pointer">
-                          {post.category.name}
-                        </span>
-                      </Link>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Social Actions */}
-            <div className="flex items-center gap-4">
-              <LikeButton
-                postId={post.id}
-                initialCount={post._count.likes}
-                variant="ghost"
-                size="default"
-              />
-              <Button variant="ghost" className="flex items-center gap-1">
-                <MessageSquare className="h-4 w-4" />
-                <span className="text-sm">0</span>
-              </Button>
-              <ShareButton title={post.title} />
-            </div>
-          </div>
 
           {/* Divider */}
           <Separator />
@@ -338,6 +261,62 @@ const BlogPostPage = async ({ params }: BlogPostPageProps) => {
         />
       </main>
     </div>
+        {/* Sidebar */}
+        <aside className="hidden lg:block w-72 shrink-0 pt-12 pl-8 border-l border-border/50">
+          <div className="sticky top-24 space-y-8">
+            {/* Breadcrumb */}
+            <Breadcrumb 
+              items={[
+                { label: 'Blog', href: '/' },
+                ...(post.category ? [{ label: post.category.name, href: `/?category=${post.category.slug}` }] : []),
+                { label: post.title }
+              ]}
+              className="text-xs text-muted-foreground"
+            />
+
+            {/* Meta */}
+            <div className="space-y-4 text-sm text-muted-foreground">
+              <p>
+                {new Date(post.createdAt).toLocaleDateString("tr-TR", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+              <p>{readingTime} dk okuma</p>
+              {post.category && (
+                <Link href={`/?category=${post.category.slug}`} className="block hover:text-foreground transition-colors">
+                  {post.category.name}
+                </Link>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-1">
+              <LikeButton
+                postId={post.id}
+                initialCount={post._count.likes}
+                variant="ghost"
+                size="sm"
+              />
+              <ShareButton title={post.title} />
+            </div>
+
+            {/* Tags */}
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {post.tags.map((tag: string) => (
+                  <Link key={tag} href={`/?tag=${encodeURIComponent(tag)}`}>
+                    <span className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                      #{tag}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
     </ImageKitProvider>
   );
 };

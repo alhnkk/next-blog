@@ -135,13 +135,13 @@ const BlogPage = async ({
             />
           )}
           
-          <div className="mb-8">
+          <div className="">
             <h2 className="text-3xl font-bold tracking-tight">
               {selectedCategoryName
                 ? `${selectedCategoryName} Gönderileri`
                 : selectedTag
                 ? `#${selectedTag} Etiketli Gönderiler`
-                : "Gönderiler"}
+                : ""}
             </h2>
             
             {/* Post sayısı ve açıklama */}
