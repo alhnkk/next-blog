@@ -32,6 +32,6 @@ export function createCachedFunction<T extends (...args: Parameters<T>) => Promi
       revalidate: options.revalidate ?? CACHE_TIMES.MEDIUM,
       tags: options.tags ?? [],
     }
-  ) as T;
+  ) as unknown as T;
 }
 
