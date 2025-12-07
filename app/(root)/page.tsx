@@ -239,7 +239,7 @@ const BlogPage = async ({
             </div>
           )}
         </div>
-        <aside className="sticky top-8 shrink-0 lg:max-w-sm w-full">
+        <aside className="hidden lg:block w-72 shrink-0 sticky top-24">
           <Sidebar
             categories={categories}
             popularTags={popularTags}
